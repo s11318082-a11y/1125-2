@@ -1,0 +1,2743 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>午夜謝幕：月蝕馬戲團</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Google Fonts：思源宋體 (Noto Serif TC) 與 Cinzel Decorative 哥德襯線字體 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Noto+Serif+TC:wght@400;600;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        midnight: '#0a080c',
+                        velvet: '#3a0b16',
+                        velvetDark: '#21050c',
+                        antiqueGold: '#c89d54',
+                        goldDim: '#8a6830',
+                        moonSilver: '#e2dce8',
+                        bloodCrimson: '#9e1b24',
+                        parchment: '#161219',
+                    },
+                    fontFamily: {
+                        serif: ['"Noto Serif TC"', 'Georgia', 'serif'],
+                        gothic: ['"Cinzel Decorative"', '"Noto Serif TC"', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* 自訂哥德式馬戲團視覺細節與動態效果 */
+        :root {
+            --vignette-intensity: 0.72;
+            --spotlight-x: 50%;
+            --spotlight-y: 35%;
+        }
+
+        body {
+            background-color: #070509;
+            color: #e2dce8;
+            font-family: 'Noto Serif TC', serif;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 50% 10%, rgba(74, 12, 26, 0.42) 0%, rgba(7, 5, 9, 0.96) 68%),
+                repeating-linear-gradient(90deg, rgba(158, 27, 36, 0.03) 0px, rgba(158, 27, 36, 0.03) 36px, rgba(10, 8, 12, 0.25) 36px, rgba(10, 8, 12, 0.25) 72px);
+        }
+
+        /* 劇院紅絲絨布幔左右邊框（收窄為精緻邊緣鑲邊，避免視覺受阻） */
+        .velvet-curtain-left, .velvet-curtain-right {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            width: clamp(6px, 1.2vw, 18px);
+            pointer-events: none;
+            z-index: 35;
+            background: repeating-linear-gradient(
+                90deg,
+                #1a0308 0px,
+                #3d0915 6px,
+                #22040b 12px
+            );
+            box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.95), 0 0 18px rgba(0, 0, 0, 0.85);
+            opacity: 0.45;
+        }
+        .velvet-curtain-left {
+            left: 0;
+            border-right: 1px solid rgba(200, 157, 84, 0.25);
+        }
+        .velvet-curtain-right {
+            right: 0;
+            border-left: 1px solid rgba(200, 157, 84, 0.25);
+        }
+
+        /* 舞台跟隨聚光燈光束 */
+        #stage-spotlight {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 2;
+            background: radial-gradient(
+                650px circle at var(--spotlight-x) var(--spotlight-y),
+                rgba(200, 157, 84, 0.08) 0%,
+                rgba(158, 27, 36, 0.035) 40%,
+                transparent 75%
+            );
+            transition: opacity 0.5s ease;
+        }
+
+        /* 動態暗角壓迫層 (隨恐懼值加深) */
+        #fear-vignette {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 40;
+            background: radial-gradient(circle at center, transparent 40%, rgba(4, 1, 6, var(--vignette-intensity)) 100%);
+            transition: background 1.5s ease, box-shadow 1.5s ease;
+        }
+
+        /* 高恐懼值下的微弱血紅脈動邊框與螢幕微震 */
+        @keyframes fearPulse {
+            0%, 100% { box-shadow: inset 0 0 45px rgba(158, 27, 36, 0.08); }
+            50% { box-shadow: inset 0 0 110px rgba(158, 27, 36, 0.48); }
+        }
+
+        @keyframes dreadTremor {
+            0%, 94%, 100% { transform: translate(0, 0); }
+            95% { transform: translate(-1.5px, 1px); }
+            97% { transform: translate(1.5px, -1px); }
+            99% { transform: translate(-1px, -0.5px); }
+        }
+
+        .high-fear-pulse {
+            animation: fearPulse 2.6s infinite ease-in-out;
+        }
+        .extreme-dread-shake {
+            animation: dreadTremor 4.5s infinite;
+        }
+
+        /* 月蝕背景光暈與星象旋轉環 */
+        @keyframes slowRotate {
+            from { transform: translateX(-50%) rotate(0deg); }
+            to { transform: translateX(-50%) rotate(360deg); }
+        }
+
+        .eclipse-orb {
+            position: fixed;
+            top: -130px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 360px;
+            height: 360px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 50% 45%, #070509 58%, #1f060c 100%);
+            box-shadow: 
+                0 0 70px 14px rgba(200, 157, 84, 0.24),
+                0 0 140px 40px rgba(158, 27, 36, 0.22),
+                inset 0 -12px 30px rgba(200, 157, 84, 0.45);
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.85;
+        }
+
+        .eclipse-ring {
+            position: fixed;
+            top: -165px;
+            left: 50%;
+            width: 430px;
+            height: 430px;
+            border-radius: 50%;
+            border: 1px dashed rgba(200, 157, 84, 0.22);
+            pointer-events: none;
+            z-index: 0;
+            animation: slowRotate 90s linear infinite;
+        }
+
+        /* 華麗哥德邊框與四角雕花 */
+        .gothic-frame {
+            position: relative;
+            background: linear-gradient(160deg, rgba(24, 18, 28, 0.94) 0%, rgba(12, 9, 15, 0.97) 100%);
+            border: 1px solid rgba(200, 157, 84, 0.35);
+            box-shadow: 
+                0 15px 45px rgba(0, 0, 0, 0.85),
+                inset 0 0 24px rgba(58, 11, 22, 0.35);
+        }
+        .gothic-frame::before, .gothic-frame::after {
+            content: '✦';
+            position: absolute;
+            font-size: 11px;
+            color: rgba(200, 157, 84, 0.55);
+            pointer-events: none;
+        }
+        .gothic-frame::before { top: 6px; left: 8px; }
+        .gothic-frame::after { bottom: 6px; right: 8px; }
+
+        /* 復古燙金門票 3D 翻轉與光澤 */
+        .circus-ticket {
+            background: linear-gradient(135deg, #241a13 0%, #342318 48%, #1c130e 100%);
+            border: 1.5px solid #c89d54;
+            box-shadow: 
+                0 12px 32px rgba(0, 0, 0, 0.85),
+                inset 0 0 18px rgba(200, 157, 84, 0.22);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.45s ease;
+        }
+        .circus-ticket:hover {
+            transform: translateY(-3px) scale(1.01);
+            box-shadow: 0 16px 40px rgba(158, 27, 36, 0.35), inset 0 0 24px rgba(200, 157, 84, 0.35);
+        }
+        .circus-ticket::before, .circus-ticket::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background-color: #070509;
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 1.5px solid #c89d54;
+            z-index: 2;
+        }
+        .circus-ticket::before { left: -10px; }
+        .circus-ticket::after { right: -10px; }
+
+        /* 首字下沉哥德小說排版 */
+        .novel-dropcap::first-letter {
+            float: left;
+            font-size: 2.6rem;
+            line-height: 0.85;
+            padding-right: 10px;
+            padding-top: 4px;
+            color: #c89d54;
+            font-weight: 900;
+            text-shadow: 0 2px 12px rgba(158, 27, 36, 0.75);
+        }
+
+        /* 捲軸美化 */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #070509;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #470d1b;
+            border-radius: 3px;
+            border: 1px solid rgba(200, 157, 84, 0.35);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6e1429;
+        }
+
+        /* 隱藏水平捲軸輔助 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* 劇情段落淡入動畫 */
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .narrative-enter {
+            animation: fadeSlideUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* 微弱文字詭異閃爍 (高恐懼觸發) */
+        @keyframes subtleGlitch {
+            0%, 95%, 100% { opacity: 1; transform: translateX(0); text-shadow: none; }
+            96% { opacity: 0.72; transform: translateX(-1.5px); text-shadow: 2px 0 #9e1b24; }
+            98% { opacity: 0.92; transform: translateX(1.5px); text-shadow: -2px 0 #c89d54; }
+        }
+        .glitch-text {
+            animation: subtleGlitch 6s infinite;
+        }
+
+        /* 粒子畫布 */
+        #dust-canvas {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* 選項按鈕光澤與燭光掃過特效 */
+        .choice-btn {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(100deg, rgba(36, 6, 14, 0.88) 0%, rgba(20, 15, 24, 0.94) 100%);
+            border: 1px solid rgba(200, 157, 84, 0.32);
+            transition: all 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .choice-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(200, 157, 84, 0.14), transparent);
+            transition: left 0.5s ease;
+        }
+        .choice-btn:hover:not(:disabled) {
+            background: linear-gradient(100deg, rgba(66, 12, 26, 0.96) 0%, rgba(40, 14, 26, 0.96) 100%);
+            border-color: #c89d54;
+            transform: translateX(4px);
+            box-shadow: 0 6px 20px rgba(158, 27, 36, 0.35), inset 0 0 12px rgba(200, 157, 84, 0.12);
+        }
+        .choice-btn:hover:not(:disabled)::after {
+            left: 130%;
+        }
+
+        /* 行動選項專屬滾動容器與漸層提示 */
+        .choices-scroll-area {
+            scrollbar-width: thin;
+            scrollbar-color: #c89d54 #120d16;
+        }
+        .choices-scroll-area::-webkit-scrollbar {
+            width: 7px;
+        }
+        .choices-scroll-area::-webkit-scrollbar-track {
+            background: rgba(10, 8, 12, 0.85);
+            border-radius: 6px;
+        }
+        .choices-scroll-area::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #8a6830, #c89d54);
+            border-radius: 6px;
+            border: 1px solid #070509;
+        }
+        .choices-scroll-area::-webkit-scrollbar-thumb:hover {
+            background: #e2b86b;
+        }
+
+        /* 蠟封章徽飾 */
+        .wax-seal {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #b8202b, #610b12);
+            border: 1.5px solid rgba(200, 157, 84, 0.65);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.8), inset 0 0 6px rgba(255, 200, 200, 0.25);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #e8c784;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        /* 塔羅牌風格結局圖鑑卡片特效 */
+        .tarot-card-unlocked {
+            background: linear-gradient(155deg, rgba(46, 11, 21, 0.92) 0%, rgba(16, 12, 20, 0.98) 60%, rgba(36, 22, 14, 0.95) 100%);
+            border: 1px solid rgba(200, 157, 84, 0.65);
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.8), inset 0 0 18px rgba(200, 157, 84, 0.16);
+            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .tarot-card-unlocked:hover {
+            transform: translateY(-4px);
+            border-color: #e8c784;
+            box-shadow: 0 14px 36px rgba(158, 27, 36, 0.4), inset 0 0 24px rgba(200, 157, 84, 0.28);
+        }
+        .tarot-card-locked {
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(14, 10, 18, 0.96) 0px,
+                rgba(14, 10, 18, 0.96) 10px,
+                rgba(24, 10, 16, 0.96) 10px,
+                rgba(24, 10, 16, 0.96) 20px
+            );
+            border: 1px dashed rgba(200, 157, 84, 0.28);
+            box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.9);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-bloodCrimson selection:text-moonSilver">
+
+    <!-- 背景裝飾：月蝕星環、劇院紅絲絨幕簾、滑鼠聚光燈、塵埃餘燼與動態暗角 -->
+    <div class="eclipse-ring"></div>
+    <div class="eclipse-orb"></div>
+    <div class="velvet-curtain-left hidden sm:block"></div>
+    <div class="velvet-curtain-right hidden sm:block"></div>
+    <div id="stage-spotlight"></div>
+    <canvas id="dust-canvas"></canvas>
+    <div id="fear-vignette"></div>
+
+    <!-- ==================== 1. 標題開場畫面 (Landing Screen) ==================== -->
+    <div id="start-screen" class="relative z-20 flex-1 flex flex-col items-center justify-center px-6 sm:px-12 lg:px-16 py-12 text-center min-h-screen">
+        <div class="max-w-2xl w-full space-y-7 narrative-enter">
+            <!-- 頂部哥德星象徽章 -->
+            <div class="inline-flex items-center gap-3 px-5 py-1.5 rounded-full border border-antiqueGold/45 bg-velvetDark/75 text-antiqueGold text-xs tracking-[0.28em] uppercase shadow-[0_0_20px_rgba(200,157,84,0.18)]">
+                <span>☾</span>
+                <span>Eclipse Circus • Psychological Horror</span>
+                <span>☽</span>
+            </div>
+
+            <!-- 主標題與雙層燙金陰影 -->
+            <div class="space-y-3 relative">
+                <div class="text-xs tracking-[0.6em] text-antiqueGold/60 uppercase font-gothic">THE MIDNIGHT CURTAIN</div>
+                <h1 class="text-5xl sm:text-7xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-b from-moonSilver via-antiqueGold to-goldDim drop-shadow-[0_6px_28px_rgba(200,157,84,0.42)]">
+                    午夜謝幕
+                </h1>
+                <div class="flex items-center justify-center gap-4">
+                    <span class="h-[1px] w-12 sm:w-20 bg-gradient-to-r from-transparent to-bloodCrimson"></span>
+                    <h2 class="text-2xl sm:text-3xl font-bold tracking-[0.35em] text-bloodCrimson drop-shadow-[0_2px_14px_rgba(158,27,36,0.85)]">
+                        月蝕馬戲團
+                    </h2>
+                    <span class="h-[1px] w-12 sm:w-20 bg-gradient-to-l from-transparent to-bloodCrimson"></span>
+                </div>
+            </div>
+
+            <!-- 復古門票預覽 (附火漆蠟封) -->
+            <div class="max-w-md mx-auto circus-ticket rounded-xl p-6 text-center space-y-3">
+                <div class="flex items-center justify-between text-[10px] tracking-[0.3em] text-antiqueGold/80 uppercase border-b border-antiqueGold/30 pb-2">
+                    <span>ADMIT ONE</span>
+                    <span>• MIDNIGHT SHOW •</span>
+                    <span>VIP</span>
+                </div>
+                <p class="text-lg sm:text-xl font-bold text-antiqueGold tracking-wide py-2 drop-shadow">
+                    「您將得到自己最渴望的東西。」
+                </p>
+                <div class="flex justify-between items-center text-[11px] text-moonSilver/65 pt-2 border-t border-antiqueGold/20">
+                    <span>NO. 0000-ECLIPSE</span>
+                    <span class="wax-seal" title="月蝕火漆印">☾</span>
+                    <span>離場時間：未知</span>
+                </div>
+            </div>
+
+            <!-- 簡介文字 -->
+            <p class="text-moonSilver/85 text-sm sm:text-base leading-relaxed max-w-lg mx-auto">
+                每當午夜鐘聲響起，那座沒有固定地址的紅黑帳篷便會悄然降臨。<br>
+                門票已經握在你手中——但沒有人知道，馬戲團索取的代價究竟是什麼。
+            </p>
+
+            <!-- 啟動按鈕群 -->
+            <div class="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3.5 pt-2">
+                <button id="btn-start-new" class="w-full sm:w-auto px-9 py-4 rounded-xl bg-gradient-to-r from-velvet via-bloodCrimson to-velvet text-moonSilver font-bold text-lg tracking-widest border border-antiqueGold/75 shadow-[0_0_30px_rgba(158,27,36,0.65)] hover:shadow-[0_0_45px_rgba(200,157,84,0.75)] hover:border-antiqueGold transition-all duration-300 active:scale-95">
+                    ✦ 踏入馬戲團 ✦
+                </button>
+                <button id="btn-continue-save" class="hidden w-full sm:w-auto px-6 py-4 rounded-xl bg-parchment/95 text-antiqueGold font-semibold text-base tracking-wider border border-antiqueGold/45 hover:bg-velvetDark hover:border-antiqueGold transition-all duration-300 shadow-lg">
+                    延續未完的夜幕
+                </button>
+                <button id="btn-landing-compendium" class="w-full sm:w-auto px-6 py-4 rounded-xl bg-midnight/90 text-antiqueGold font-semibold text-base tracking-wider border border-antiqueGold/45 hover:bg-velvetDark hover:border-antiqueGold transition-all duration-300 shadow-lg flex items-center justify-center gap-2">
+                    <span>🏆</span>
+                    <span>劇情圖鑑</span>
+                    <span id="landing-compendium-badge" class="px-2 py-0.5 rounded-full bg-velvetDark border border-antiqueGold/40 text-xs text-moonSilver/90">0/8</span>
+                </button>
+                <button id="btn-landing-audio" type="button" title="切換馬戲團氛圍音效" class="w-full sm:w-auto px-5 py-4 rounded-xl bg-midnight/85 text-moonSilver/85 font-semibold text-sm tracking-wider border border-antiqueGold/35 hover:text-antiqueGold hover:border-antiqueGold transition-all duration-300 shadow-lg flex items-center justify-center gap-2">
+                    <span id="landing-audio-icon">🔇</span>
+                    <span id="landing-audio-label">音效已關</span>
+                </button>
+                <button id="btn-landing-apikey" type="button" title="設定 Gemini API Key 啟動 AI 劇情引擎" class="w-full sm:w-auto px-5 py-4 rounded-xl bg-midnight/85 text-antiqueGold/90 font-semibold text-sm tracking-wider border border-antiqueGold/40 hover:bg-velvetDark hover:border-antiqueGold transition-all duration-300 shadow-lg flex items-center justify-center gap-2">
+                    <span>🔑</span>
+                    <span id="landing-apikey-label">AI 金鑰設定</span>
+                </button>
+            </div>
+
+            <p class="text-xs text-moonSilver/45 pt-2">
+                建議開啟音效以獲得最佳心理沉浸體驗 • 支援自由輸入任何行動
+            </p>
+        </div>
+    </div>
+
+    <!-- ==================== 2. 主遊戲介面 (Main Game Screen) ==================== -->
+    <div id="game-screen" class="hidden relative z-10 flex flex-col h-screen h-dvh max-h-dvh overflow-hidden px-1 sm:px-4 lg:px-6">
+        
+        <!-- 頂部導覽列 -->
+        <header class="shrink-0 bg-midnight/90 backdrop-blur-md border-b border-antiqueGold/25 px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-2 z-30">
+            <div class="flex items-center gap-3">
+                <span class="text-antiqueGold text-xl">☾</span>
+                <div>
+                    <h1 class="text-base sm:text-lg font-bold tracking-wider text-antiqueGold leading-tight">
+                        午夜謝幕：月蝕馬戲團
+                    </h1>
+                    <div class="flex items-center gap-2 text-xs text-moonSilver/60">
+                        <span id="act-indicator" class="text-bloodCrimson font-semibold">第一幕：入場</span>
+                        <span>•</span>
+                        <span id="header-time">午夜 00:00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右側控制按鈕 -->
+            <div class="flex items-center gap-1.5 sm:gap-2">
+                <!-- 劇情圖鑑按鈕 -->
+                <button id="btn-compendium-modal" title="檢視已解鎖的謝幕結局圖鑑" class="p-2 sm:px-3 sm:py-1.5 rounded-lg bg-velvetDark/90 border border-antiqueGold/50 text-antiqueGold hover:bg-velvet hover:border-antiqueGold transition text-xs flex items-center gap-1.5 shadow-[0_0_12px_rgba(200,157,84,0.15)]">
+                    <span>🏆</span>
+                    <span class="hidden sm:inline font-semibold">劇情圖鑑</span>
+                    <span id="header-compendium-badge" class="px-1.5 py-0.5 rounded bg-midnight/90 border border-antiqueGold/30 text-[10px] text-moonSilver/90">0/8</span>
+                </button>
+
+                <!-- 往昔記憶 / 劇情回顧按鈕 -->
+                <button id="btn-history-modal" title="翻閱往昔劇情與抉擇紀錄" class="p-2 sm:px-3 sm:py-1.5 rounded-lg bg-velvetDark/90 border border-antiqueGold/50 text-antiqueGold hover:bg-velvet hover:border-antiqueGold transition text-xs flex items-center gap-1.5 shadow-[0_0_12px_rgba(200,157,84,0.15)]">
+                    <span>📖</span>
+                    <span class="hidden sm:inline font-semibold">往昔記憶</span>
+                    <span id="history-badge" class="px-1.5 py-0.5 rounded bg-midnight/90 border border-antiqueGold/30 text-[10px] text-moonSilver/90">第 1 章</span>
+                </button>
+
+                <!-- 音效切換 -->
+                <button id="btn-audio-toggle" title="切換環境音效" class="p-2 sm:px-3 sm:py-1.5 rounded-lg bg-parchment border border-antiqueGold/30 text-moonSilver/80 hover:text-antiqueGold hover:border-antiqueGold transition text-xs flex items-center gap-1.5">
+                    <span id="audio-icon">🔇</span>
+                    <span class="hidden md:inline" id="audio-label">音效已關</span>
+                </button>
+
+                <!-- 回溯上一步 -->
+                <button id="btn-rewind" title="回溯至上一個抉擇" class="p-2 sm:px-3 sm:py-1.5 rounded-lg bg-parchment border border-antiqueGold/30 text-moonSilver/80 hover:text-antiqueGold hover:border-antiqueGold transition text-xs flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed" disabled>
+                    <span>↺</span>
+                    <span class="hidden md:inline">回溯</span>
+                </button>
+
+                <!-- API 金鑰設定 Modal 觸發 -->
+                <button id="btn-header-apikey" title="設定 Gemini API Key" class="p-2 sm:px-3 sm:py-1.5 rounded-lg bg-parchment border border-antiqueGold/30 text-antiqueGold/85 hover:text-antiqueGold hover:border-antiqueGold transition text-xs flex items-center gap-1">
+                    <span>🔑</span>
+                    <span class="hidden md:inline">金鑰</span>
+                </button>
+
+                <!-- 存檔管理 Modal 觸發 -->
+                <button id="btn-save-modal" title="存檔與記憶手札" class="p-2 sm:px-3 sm:py-1.5 rounded-lg bg-parchment border border-antiqueGold/30 text-moonSilver/80 hover:text-antiqueGold hover:border-antiqueGold transition text-xs flex items-center gap-1">
+                    <span>📜</span>
+                    <span class="hidden md:inline">存檔</span>
+                </button>
+
+                <!-- 手機版側邊欄切換按鈕 -->
+                <button id="btn-mobile-drawer" class="lg:hidden p-2 rounded-lg bg-velvetDark border border-antiqueGold/50 text-antiqueGold text-xs flex items-center gap-1">
+                    <span>🕯️</span>
+                    <span>手札</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- 中央雙欄工作區 (加入 min-h-0 防止電腦全螢幕時 Flex 子元素溢出遮擋底部選項) -->
+        <div class="flex-1 min-h-0 flex overflow-hidden relative">
+            
+            <!-- 左側/中央：主要敘事與互動視窗 -->
+            <main class="flex-1 min-h-0 flex flex-col overflow-hidden">
+                
+                <!-- 劇情捲動閱讀區 -->
+                <div id="narrative-feed" class="flex-1 min-h-0 overflow-y-auto px-4 sm:px-8 lg:px-12 py-5 sm:py-6 space-y-6 scroll-smooth">
+                    <!-- 動態插入回合卡片 -->
+                </div>
+
+                <!-- 底部互動與自由輸入控制台 (固定於視口底部，選項區支援獨立平滑滾動) -->
+                <div class="shrink-0 bg-midnight/95 backdrop-blur-md border-t border-antiqueGold/35 px-4 sm:px-8 lg:px-12 py-3 sm:py-3.5 space-y-2.5 z-20 shadow-[0_-12px_32px_rgba(0,0,0,0.85)]">
+                    
+                    <!-- 載入中指示器 -->
+                    <div id="loading-indicator" class="hidden items-center justify-center gap-3 py-2.5 text-antiqueGold text-sm">
+                        <div class="w-4 h-4 border-2 border-antiqueGold border-t-transparent rounded-full animate-spin"></div>
+                        <span class="tracking-widest animate-pulse">帳篷深處傳來低語，命運正在編織中……</span>
+                    </div>
+
+                    <!-- 錯誤重試提示區 -->
+                    <div id="error-banner" class="hidden rounded-xl bg-velvetDark border border-bloodCrimson p-3 text-xs sm:text-sm text-moonSilver flex items-center justify-between gap-3">
+                        <span id="error-message">迷霧干擾了馬戲團的訊號，請稍後再試。</span>
+                        <button id="btn-retry" class="shrink-0 px-3 py-1.5 rounded-lg bg-bloodCrimson text-white font-semibold hover:bg-red-700 transition">
+                            重新感應
+                        </button>
+                    </div>
+
+                    <!-- 建議行動選項標頭與滾動提示列 -->
+                    <div id="choices-header" class="hidden items-center justify-between text-[11px] sm:text-xs text-antiqueGold/85 px-1">
+                        <span class="font-semibold tracking-wider flex items-center gap-1.5">
+                            <span>💬</span>
+                            <span>建議行動選項</span>
+                        </span>
+                        <span class="text-moonSilver/55 flex items-center gap-1">
+                            <span>⇅ 上下滾動檢視全部選項</span>
+                        </span>
+                    </div>
+
+                    <!-- AI 建議行動選項 (獨立平滑滾動區，確保電腦全螢幕清晰可見) -->
+                    <div id="choices-container" class="choices-scroll-area grid grid-cols-1 md:grid-cols-2 gap-2 max-h-44 sm:max-h-52 overflow-y-auto overscroll-contain scroll-smooth pr-1.5 rounded-xl">
+                        <!-- 動態生成選項按鈕 -->
+                    </div>
+
+                    <!-- 自由輸入框 -->
+                    <form id="custom-action-form" class="flex items-center gap-2 pt-0.5">
+                        <div class="relative flex-1">
+                            <input 
+                                type="text" 
+                                id="custom-action-input" 
+                                placeholder="自由輸入你的任何行動、對話、觀察、欺騙或逃跑……" 
+                                autocomplete="off"
+                                class="w-full bg-parchment/90 text-moonSilver placeholder-moonSilver/40 text-sm sm:text-base rounded-xl pl-4 pr-10 py-2.5 sm:py-3 border border-antiqueGold/40 focus:outline-none focus:border-antiqueGold focus:ring-1 focus:ring-antiqueGold transition"
+                            >
+                            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-antiqueGold/50 text-xs pointer-events-none">✎</span>
+                        </div>
+                        <button 
+                            type="submit" 
+                            id="btn-send-action"
+                            class="shrink-0 px-5 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-velvet to-bloodCrimson text-moonSilver font-bold text-sm sm:text-base tracking-wider border border-antiqueGold/50 hover:border-antiqueGold hover:shadow-[0_0_15px_rgba(200,157,84,0.3)] transition disabled:opacity-50"
+                        >
+                            行動
+                        </button>
+                    </form>
+                </div>
+            </main>
+
+            <!-- 右側：隨身手札與線索欄 (桌面常駐，手機版滑出抽屜) -->
+            <aside id="journal-sidebar" class="fixed inset-y-0 right-0 w-80 sm:w-96 bg-midnight/95 lg:bg-parchment/60 backdrop-blur-xl border-l border-antiqueGold/25 transform translate-x-full lg:translate-x-0 lg:static transition-transform duration-300 ease-in-out z-40 flex flex-col min-h-0 overflow-hidden lg:mr-2">
+                
+                <!-- 手機版抽屜頂部關閉列 -->
+                <div class="lg:hidden flex items-center justify-between px-4 py-3 border-b border-antiqueGold/25 bg-velvetDark/80">
+                    <span class="text-antiqueGold font-bold tracking-wider text-sm">🕯️ 隨身手札與線索</span>
+                    <button id="btn-close-drawer" class="text-moonSilver/70 hover:text-white p-1 text-lg">✕</button>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-4 space-y-5">
+                    
+                    <!-- 神祕門票視覺卡 (可點擊翻面檢視) -->
+                    <div id="ticket-card" class="circus-ticket rounded-xl p-4 cursor-pointer select-none" title="點擊檢視門票背面細節">
+                        <div id="ticket-front" class="space-y-2 text-center">
+                            <div class="flex justify-between items-center text-[10px] text-antiqueGold/70 tracking-widest">
+                                <span>ECLIPSE CIRCUS</span>
+                                <span>點擊翻面 ↻</span>
+                            </div>
+                            <p class="text-sm font-bold text-antiqueGold tracking-wide py-1">
+                                「您將得到自己最渴望的東西。」
+                            </p>
+                            <div id="ticket-condition" class="text-[11px] text-moonSilver/60 border-t border-antiqueGold/20 pt-1.5">
+                                票面狀態：完好，散發微弱的檀香與鐵鏽味
+                            </div>
+                        </div>
+                        <div id="ticket-back" class="hidden space-y-2 text-center">
+                            <div class="flex justify-between items-center text-[10px] text-bloodCrimson tracking-widest">
+                                <span>FINE PRINT</span>
+                                <span>點擊翻回 ↺</span>
+                            </div>
+                            <p class="text-xs text-moonSilver/85 leading-relaxed py-1">
+                                馬戲團在午夜鐘響時展開，也在鐘響前收起。別弄丟你的門票，也別忘了自己渴望什麼。
+                            </p>
+                            <div class="text-[10px] text-antiqueGold/70 border-t border-antiqueGold/20 pt-1.5">
+                                ✦ 月蝕之夜 • 禁止擅自離席 ✦
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 當前處境與公開線索 -->
+                    <div class="gothic-frame rounded-xl p-4 space-y-2.5 text-xs">
+                        <h3 class="text-xs font-bold tracking-[0.2em] text-antiqueGold uppercase flex items-center gap-2 border-b border-antiqueGold/20 pb-2">
+                            <span>🕯️</span>
+                            <span>當前處境</span>
+                        </h3>
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between gap-2">
+                                <span class="text-moonSilver/55 shrink-0">地點</span>
+                                <span id="status-location" class="text-antiqueGold font-semibold text-right">馬戲團入口外圍</span>
+                            </div>
+                            <div class="flex justify-between gap-2">
+                                <span class="text-moonSilver/55 shrink-0">時間</span>
+                                <span id="status-time" class="text-moonSilver/90 text-right">午夜 00:00</span>
+                            </div>
+                            <div class="pt-1 border-t border-antiqueGold/15">
+                                <span class="text-moonSilver/55 block mb-0.5">目前目標</span>
+                                <p id="status-quest" class="text-moonSilver/85 leading-relaxed">憑手中的神祕門票入場，尋找你最渴望之物。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 人物印象手札 (附專屬角色紋章色彩) -->
+                    <div class="gothic-frame rounded-xl p-4 space-y-2.5">
+                        <h3 class="text-xs font-bold tracking-[0.2em] text-antiqueGold uppercase flex items-center gap-2 border-b border-antiqueGold/20 pb-2">
+                            <span>🎭</span>
+                            <span>馬戲團人物</span>
+                        </h3>
+                        <div id="characters-list" class="space-y-2.5 text-xs">
+                            <div class="p-2.5 rounded-lg bg-midnight/80 border-l-2 border-l-bloodCrimson border border-antiqueGold/15">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-antiqueGold flex items-center gap-1.5"><span>🎩</span> 伊萊恩 Elias</span>
+                                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-bloodCrimson/25 text-red-200">首席魔術師</span>
+                                </div>
+                                <p id="note-elias" class="text-moonSilver/75 mt-1 leading-relaxed">傳聞中擁有紅眸與黑燕尾服的魔術師，似乎格外關注今晚的你。</p>
+                            </div>
+                            <div class="p-2.5 rounded-lg bg-midnight/80 border-l-2 border-l-slate-400 border border-antiqueGold/15">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-moonSilver/95 flex items-center gap-1.5"><span>🗡️</span> 維洛娜 Verona</span>
+                                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">副團長</span>
+                                </div>
+                                <p id="note-verona" class="text-moonSilver/65 mt-1 leading-relaxed">尚未正式接觸。</p>
+                            </div>
+                            <div class="p-2.5 rounded-lg bg-midnight/80 border-l-2 border-l-amber-500 border border-antiqueGold/15">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-moonSilver/95 flex items-center gap-1.5"><span>🃏</span> 棉花 Cotton</span>
+                                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-950/60 text-amber-200">小丑</span>
+                                </div>
+                                <p id="note-cotton" class="text-moonSilver/65 mt-1 leading-relaxed">尚未正式接觸。</p>
+                            </div>
+                            <div class="p-2.5 rounded-lg bg-midnight/80 border-l-2 border-l-purple-400 border border-antiqueGold/15">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-moonSilver/95 flex items-center gap-1.5"><span>🔮</span> 瑟琳 Celine</span>
+                                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-purple-950/60 text-purple-200">占卜師</span>
+                                </div>
+                                <p id="note-celine" class="text-moonSilver/65 mt-1 leading-relaxed">尚未正式接觸。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 持有物品清單 -->
+                    <div class="rounded-xl bg-midnight/80 border border-antiqueGold/25 p-4 space-y-2.5">
+                        <h3 class="text-xs font-bold tracking-[0.2em] text-antiqueGold uppercase flex items-center gap-2 border-b border-antiqueGold/20 pb-2">
+                            <span>🗝️</span>
+                            <span>持有物品</span>
+                        </h3>
+                        <ul id="inventory-list" class="space-y-1.5 text-xs text-moonSilver/85">
+                            <li class="flex items-center gap-2 bg-parchment/80 px-2.5 py-1.5 rounded-lg border border-antiqueGold/15">
+                                <span class="text-antiqueGold">✦</span>
+                                <span>月蝕馬戲團燙金門票</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- 已發現線索 -->
+                    <div class="rounded-xl bg-midnight/80 border border-antiqueGold/25 p-4 space-y-2.5">
+                        <h3 class="text-xs font-bold tracking-[0.2em] text-antiqueGold uppercase flex items-center gap-2 border-b border-antiqueGold/20 pb-2">
+                            <span>🔍</span>
+                            <span>已發現線索</span>
+                        </h3>
+                        <ul id="clues-list" class="space-y-2 text-xs text-moonSilver/80">
+                            <li class="text-moonSilver/40 italic">尚未發現異常線索……</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </aside>
+
+            <!-- 手機版抽屜遮罩 -->
+            <div id="drawer-backdrop" class="hidden fixed inset-0 bg-black/70 z-30 lg:hidden"></div>
+        </div>
+    </div>
+
+    <!-- ==================== 3. 存檔與控制 Modal ==================== -->
+    <div id="save-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="bg-parchment border border-antiqueGold/50 rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-antiqueGold/25 pb-3">
+                <h3 class="text-lg font-bold text-antiqueGold tracking-wider">📜 記憶與輪迴手札</h3>
+                <button id="btn-close-save-modal" class="text-moonSilver/60 hover:text-white text-lg">✕</button>
+            </div>
+            
+            <div class="space-y-3 text-sm">
+                <div class="p-3 rounded-xl bg-midnight border border-antiqueGold/20 space-y-1">
+                    <div class="text-xs text-antiqueGold">自動記憶存檔</div>
+                    <div id="save-slot-info" class="text-xs text-moonSilver/70">尚無存檔紀錄</div>
+                </div>
+
+                <!-- 操作回饋提示條 -->
+                <div id="save-toast" class="hidden text-center text-xs py-1.5 px-3 rounded-lg bg-velvetDark border border-antiqueGold/40 text-antiqueGold"></div>
+
+                <div class="grid grid-cols-1 gap-2.5 pt-2">
+                    <button id="btn-manual-save" class="w-full py-2.5 px-4 rounded-xl bg-velvetDark hover:bg-velvet border border-antiqueGold/40 text-antiqueGold font-semibold transition">
+                        刻錄當前記憶（手動存檔）
+                    </button>
+                    <button id="btn-manual-load" class="w-full py-2.5 px-4 rounded-xl bg-midnight hover:bg-velvetDark border border-antiqueGold/30 text-moonSilver transition">
+                        讀取上次刻錄的記憶
+                    </button>
+                    <button id="btn-restart-game" class="w-full py-2.5 px-4 rounded-xl bg-bloodCrimson/20 hover:bg-bloodCrimson/40 border border-bloodCrimson/60 text-red-300 font-semibold transition mt-2">
+                        撕毀門票・重新開始（全新輪迴）
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 4. 結局謝幕專屬彈窗 (Curtain Call Ending Modal) ==================== -->
+    <div id="ending-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md overflow-y-auto">
+        <div class="bg-gradient-to-b from-velvetDark via-midnight to-midnight border-2 border-antiqueGold rounded-2xl max-w-2xl w-full p-6 sm:p-10 space-y-6 shadow-[0_0_60px_rgba(200,157,84,0.3)] my-auto text-center narrative-enter">
+            <div class="text-xs tracking-[0.4em] text-antiqueGold/80 uppercase">
+                THE FINAL CURTAIN CALL • 第六幕：謝幕
+            </div>
+            
+            <h2 id="ending-title" class="text-2xl sm:text-4xl font-black text-antiqueGold tracking-wider">
+                結局標題
+            </h2>
+
+            <blockquote id="ending-poem" class="italic text-bloodCrimson font-semibold text-sm sm:text-base border-y border-antiqueGold/25 py-3 px-4">
+                「謝幕的鐘聲已響，你的代價已然結清。」
+            </blockquote>
+
+            <div id="ending-story" class="text-left text-sm sm:text-base text-moonSilver/90 leading-[1.85] whitespace-pre-line max-h-60 overflow-y-auto bg-black/45 p-4 sm:p-5 rounded-xl border border-antiqueGold/20"></div>
+
+            <div class="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 pt-2">
+                <button id="btn-ending-compendium" class="w-full sm:w-auto px-5 py-3 rounded-xl bg-velvetDark border border-antiqueGold/60 text-antiqueGold hover:bg-velvet transition text-sm font-semibold flex items-center justify-center gap-1.5">
+                    <span>🏆</span>
+                    <span>查看劇情圖鑑</span>
+                </button>
+                <button id="btn-ending-history" class="w-full sm:w-auto px-5 py-3 rounded-xl bg-velvetDark border border-antiqueGold/60 text-antiqueGold hover:bg-velvet transition text-sm font-semibold flex items-center justify-center gap-1.5">
+                    <span>📖</span>
+                    <span>翻閱完整往昔手札</span>
+                </button>
+                <button id="btn-ending-rewind" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-parchment border border-antiqueGold/50 text-antiqueGold hover:bg-velvetDark transition text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed">
+                    ↺ 回溯至上一個抉擇
+                </button>
+                <button id="btn-ending-restart" class="w-full sm:w-auto px-8 py-3 rounded-xl bg-gradient-to-r from-velvet to-bloodCrimson border border-antiqueGold text-moonSilver font-bold tracking-wider hover:shadow-[0_0_20px_rgba(200,157,84,0.5)] transition text-sm">
+                    重新開始（全新輪迴）
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 5. 往昔記憶手札 Modal (Story History Chronicle) ==================== -->
+    <div id="history-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md">
+        <div class="bg-gradient-to-b from-parchment via-midnight to-parchment border border-antiqueGold/60 rounded-2xl max-w-3xl w-full h-[88vh] flex flex-col shadow-[0_0_50px_rgba(0,0,0,0.95)] overflow-hidden narrative-enter">
+            
+            <!-- 手札頂部標題與操作列 -->
+            <div class="shrink-0 px-5 py-4 bg-velvetDark/90 border-b border-antiqueGold/30 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-xl text-antiqueGold">📖</span>
+                    <div>
+                        <h3 class="text-base sm:text-lg font-bold text-antiqueGold tracking-wider">往昔記憶手札・劇情回顧</h3>
+                        <p id="history-subtitle" class="text-[11px] text-moonSilver/60">已記錄 1 個午夜章節 • 可檢視過往線索與抉擇</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="btn-copy-transcript" class="px-3 py-1.5 rounded-lg bg-midnight/90 hover:bg-velvet border border-antiqueGold/40 text-antiqueGold text-xs font-medium transition flex items-center gap-1.5" title="複製完整劇情文字">
+                        <span>📋</span>
+                        <span id="copy-transcript-label">複製全篇手稿</span>
+                    </button>
+                    <button id="btn-close-history-modal" class="p-1.5 rounded-lg text-moonSilver/70 hover:text-white hover:bg-black/40 transition text-lg leading-none" title="關閉手札">✕</button>
+                </div>
+            </div>
+
+            <!-- 快速章節導覽跳轉列 -->
+            <div class="shrink-0 px-5 py-2 bg-midnight/95 border-b border-antiqueGold/15 flex items-center justify-between gap-2 text-xs">
+                <div id="history-chapter-pills" class="flex items-center gap-1.5 overflow-x-auto py-1 no-scrollbar">
+                    <!-- 動態生成各章節快速跳轉標籤 -->
+                </div>
+                <div class="shrink-0 flex items-center gap-1.5 pl-2 border-l border-antiqueGold/20">
+                    <button id="btn-history-top" class="px-2 py-1 rounded bg-parchment border border-antiqueGold/25 text-moonSilver/80 hover:text-antiqueGold transition" title="回到第一章">↑ 開端</button>
+                    <button id="btn-history-bottom" class="px-2 py-1 rounded bg-parchment border border-antiqueGold/25 text-moonSilver/80 hover:text-antiqueGold transition" title="跳至最新章節">↓ 最新</button>
+                </div>
+            </div>
+
+            <!-- 捲動閱讀主內容區 -->
+            <div id="history-scroll-container" class="flex-1 overflow-y-auto px-5 sm:px-8 py-6 space-y-8 scroll-smooth">
+                <!-- 動態渲染完整時間軸劇情 -->
+            </div>
+
+            <!-- 底部關閉提示 -->
+            <div class="shrink-0 px-5 py-3 bg-midnight/95 border-t border-antiqueGold/20 flex items-center justify-between text-xs text-moonSilver/50">
+                <span>提示：馬戲團的記憶不會說謊，留意人物前後言語的矛盾。</span>
+                <button id="btn-close-history-bottom" class="px-4 py-1.5 rounded-lg bg-velvetDark border border-antiqueGold/40 text-antiqueGold hover:bg-velvet transition font-semibold">
+                    返回舞台
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 6. 劇情圖鑑 Modal (Story & Ending Compendium) ==================== -->
+    <div id="compendium-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md">
+        <div class="bg-gradient-to-b from-parchment via-midnight to-parchment border border-antiqueGold/60 rounded-2xl max-w-4xl w-full h-[88vh] flex flex-col shadow-[0_0_60px_rgba(0,0,0,0.95)] overflow-hidden narrative-enter">
+            
+            <!-- 圖鑑頂部標題列 -->
+            <div class="shrink-0 px-5 sm:px-7 py-4 bg-velvetDark/90 border-b border-antiqueGold/30 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl text-antiqueGold">🏆</span>
+                    <div>
+                        <h3 class="text-base sm:text-xl font-bold text-antiqueGold tracking-wider">月蝕命運・劇情圖鑑</h3>
+                        <p id="compendium-subtitle" class="text-[11px] sm:text-xs text-moonSilver/65">跨輪迴永久保存所有已揭曉的謝幕結局</p>
+                    </div>
+                </div>
+                <button id="btn-close-compendium-modal" class="p-1.5 rounded-lg text-moonSilver/70 hover:text-white hover:bg-black/40 transition text-lg leading-none" title="關閉圖鑑">✕</button>
+            </div>
+
+            <!-- 收集進度條 -->
+            <div class="shrink-0 px-5 sm:px-7 py-3 bg-midnight/95 border-b border-antiqueGold/20 space-y-1.5">
+                <div class="flex items-center justify-between text-xs">
+                    <span class="text-antiqueGold font-semibold tracking-wider">✦ 命運塔羅收集進度</span>
+                    <span id="compendium-progress-text" class="text-moonSilver/85 font-bold">已解鎖 0 / 8 種正統謝幕</span>
+                </div>
+                <div class="w-full h-2 rounded-full bg-black/80 border border-antiqueGold/25 overflow-hidden">
+                    <div id="compendium-progress-bar" class="h-full bg-gradient-to-r from-velvet via-bloodCrimson to-antiqueGold transition-all duration-500" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <!-- 圖鑑主內容區（卡片網格 / 單篇詳細閱讀切換） -->
+            <div id="compendium-body" class="flex-1 overflow-y-auto px-5 sm:px-7 py-6">
+                <!-- 卡片網格視圖 -->
+                <div id="compendium-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- 動態渲染 8 張正統塔羅結局卡 + 特藏異聞卡 -->
+                </div>
+
+                <!-- 單篇結局全文檢視視圖 -->
+                <div id="compendium-detail" class="hidden max-w-2xl mx-auto space-y-5 narrative-enter">
+                    <button id="btn-compendium-back" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-velvetDark/80 border border-antiqueGold/40 text-antiqueGold text-xs hover:bg-velvet transition">
+                        <span>←</span>
+                        <span>返回圖鑑總覽</span>
+                    </button>
+
+                    <div class="gothic-frame rounded-2xl p-6 sm:p-8 space-y-5">
+                        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-antiqueGold/25 pb-3">
+                            <span id="detail-category" class="px-2.5 py-0.5 rounded-full bg-bloodCrimson/25 border border-bloodCrimson/50 text-xs text-red-200 font-semibold">命運終章</span>
+                            <span id="detail-date" class="text-xs text-moonSilver/55">解鎖時間：未知</span>
+                        </div>
+
+                        <div class="text-center space-y-3">
+                            <div id="detail-arcana" class="text-xs tracking-[0.35em] text-antiqueGold/70 uppercase">ARCANA</div>
+                            <h4 id="detail-title" class="text-2xl sm:text-3xl font-black text-antiqueGold tracking-wider">結局名稱</h4>
+                            <blockquote id="detail-poem" class="italic text-bloodCrimson font-semibold text-sm sm:text-base border-y border-antiqueGold/20 py-2.5 px-4">
+                                「詩句」
+                            </blockquote>
+                        </div>
+
+                        <div id="detail-epilogue" class="text-sm sm:text-base text-moonSilver/90 leading-[1.9] whitespace-pre-line bg-black/35 p-4 sm:p-5 rounded-xl border border-antiqueGold/15">
+                            <!-- 完整結局故事 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 底部操作列 -->
+            <div class="shrink-0 px-5 sm:px-7 py-3 bg-midnight/95 border-t border-antiqueGold/20 flex items-center justify-between text-xs text-moonSilver/50">
+                <span>提示：不同的信任度、逃脫準備與真相碎片將引向截然不同的謝幕。</span>
+                <button id="btn-close-compendium-bottom" class="px-4 py-1.5 rounded-lg bg-velvetDark border border-antiqueGold/40 text-antiqueGold hover:bg-velvet transition font-semibold">
+                    關閉圖鑑
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ==================== 7. Gemini API Key 設定 Modal ==================== -->
+    <div id="apikey-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+        <div class="bg-gradient-to-b from-parchment via-midnight to-parchment border border-antiqueGold/60 rounded-2xl max-w-md w-full p-6 space-y-5 shadow-[0_0_50px_rgba(0,0,0,0.95)] narrative-enter">
+            <div class="flex items-center justify-between border-b border-antiqueGold/25 pb-3">
+                <h3 class="text-lg font-bold text-antiqueGold tracking-wider flex items-center gap-2">
+                    <span>🔑</span>
+                    <span>月蝕之眼・AI 引擎金鑰設定</span>
+                </h3>
+                <button id="btn-close-apikey-modal" class="text-moonSilver/60 hover:text-white text-lg">✕</button>
+            </div>
+
+            <div class="space-y-3 text-xs sm:text-sm text-moonSilver/85 leading-relaxed">
+                <p>
+                    本遊戲由 <strong class="text-antiqueGold">Google Gemini AI</strong> 即時推演劇情。因為 GitHub Pages 為純靜態網頁，需要填入您自己的免費 Gemini API Key 才能喚醒馬戲團的意識。
+                </p>
+                <div class="p-3 rounded-xl bg-black/50 border border-antiqueGold/20 text-xs text-moonSilver/70 space-y-1">
+                    <div>✦ 金鑰僅儲存在您本機瀏覽器的 <code class="text-antiqueGold">localStorage</code> 中，不會上傳至任何伺服器。</div>
+                    <div>✦ 尚未取得金鑰？可前往 <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" class="text-antiqueGold underline hover:text-amber-300">Google AI Studio</a> 免費申請。</div>
+                </div>
+
+                <div class="space-y-1.5 pt-1">
+                    <label for="input-gemini-apikey" class="block text-xs font-semibold text-antiqueGold tracking-wider">請輸入 Gemini API Key：</label>
+                    <input type="password" id="input-gemini-apikey" placeholder="AIzaSy..." autocomplete="off" class="w-full bg-midnight text-moonSilver placeholder-moonSilver/35 text-sm rounded-xl px-4 py-2.5 border border-antiqueGold/40 focus:outline-none focus:border-antiqueGold focus:ring-1 focus:ring-antiqueGold transition">
+                </div>
+
+                <div id="apikey-status-msg" class="hidden text-xs py-1.5 px-3 rounded-lg bg-velvetDark border border-antiqueGold/40 text-antiqueGold text-center"></div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2.5 pt-2 border-t border-antiqueGold/20">
+                <button id="btn-clear-apikey" type="button" class="px-3.5 py-2 rounded-xl bg-bloodCrimson/20 hover:bg-bloodCrimson/40 border border-bloodCrimson/50 text-red-300 text-xs font-semibold transition">
+                    清除金鑰
+                </button>
+                <button id="btn-save-apikey" type="button" class="px-5 py-2 rounded-xl bg-gradient-to-r from-velvet to-bloodCrimson border border-antiqueGold text-moonSilver text-xs sm:text-sm font-bold tracking-wider hover:shadow-[0_0_15px_rgba(200,157,84,0.4)] transition">
+                    保存並喚醒引擎
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 核心 JavaScript 遊戲引擎 ==================== -->
+    <script>
+        /**
+         * 《午夜謝幕：月蝕馬戲團》完整單檔遊戲引擎
+         * - 支援 Gemini 3 Flash Preview 結構化動態劇情推演與隱藏數值追蹤
+         * - Web Audio API 哥德式詭異走音八音盒、LFO 呼吸感夜風、翻頁/心跳/鐘聲合成器
+         * - 漂浮金紅餘燼粒子畫布與動態恐懼值暗角/脈動回饋
+         * - 自動存檔、手動刻錄、上一步回溯、往昔手札回顧與全篇手稿複製
+         */
+
+        // ==================== 1. Web Audio API 氛圍與情境音效引擎 ====================
+        class CircusAudioEngine {
+            constructor() {
+                this.ctx = null;
+                this.isPlaying = false;
+                this.isMuted = true;
+                this.masterGain = null;
+                this.musicBoxInterval = null;
+                this.droneOsc = null;
+                this.droneGain = null;
+                this.droneFilter = null;
+                this.lfoOsc = null;
+                this.lfoGain = null;
+                this.noiseBuffer = null;
+            }
+
+            init() {
+                if (this.ctx) return;
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+
+                try {
+                    this.ctx = new AudioCtx();
+                    this.masterGain = this.ctx.createGain();
+                    this.masterGain.gain.setValueAtTime(0.0001, this.ctx.currentTime);
+                    this.masterGain.connect(this.ctx.destination);
+
+                    // 預建白噪音緩衝區，供羊皮紙／絲絨翻頁聲使用
+                    const bufferSize = Math.floor(this.ctx.sampleRate * 0.45);
+                    this.noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                    const output = this.noiseBuffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) {
+                        output[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.45));
+                    }
+                } catch (err) {
+                    console.warn('Web Audio 初始化失敗:', err);
+                }
+            }
+
+            async unlock() {
+                this.init();
+                if (!this.ctx) return false;
+                try {
+                    if (this.ctx.state === 'suspended') {
+                        await this.ctx.resume();
+                    }
+                    return this.ctx.state === 'running';
+                } catch (err) {
+                    console.warn('AudioContext 解鎖失敗:', err);
+                    return false;
+                }
+            }
+
+            async enableAmbient() {
+                const unlocked = await this.unlock();
+                if (!unlocked || !this.ctx || !this.masterGain) return false;
+
+                this.isMuted = false;
+                const now = this.ctx.currentTime;
+                this.masterGain.gain.cancelScheduledValues(now);
+                this.masterGain.gain.setValueAtTime(Math.max(this.masterGain.gain.value, 0.0001), now);
+                this.masterGain.gain.exponentialRampToValueAtTime(0.32, now + 0.35);
+
+                if (!this.isPlaying) {
+                    this.startAmbientLoops();
+                }
+                return true;
+            }
+
+            disableAmbient() {
+                this.isMuted = true;
+                if (this.ctx && this.masterGain) {
+                    const now = this.ctx.currentTime;
+                    this.masterGain.gain.cancelScheduledValues(now);
+                    this.masterGain.gain.setValueAtTime(Math.max(this.masterGain.gain.value, 0.0001), now);
+                    this.masterGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+                }
+            }
+
+            async toggle() {
+                if (!this.isMuted && this.isPlaying) {
+                    this.disableAmbient();
+                    return false;
+                }
+                return await this.enableAmbient();
+            }
+
+            startAmbientLoops() {
+                if (!this.ctx || !this.masterGain || this.isPlaying) return;
+                this.isPlaying = true;
+                const now = this.ctx.currentTime;
+
+                // 低沉帳篷夜風與深淵低頻 Drone + 緩慢 LFO 濾波掃頻（營造帳篷呼吸感）
+                this.droneOsc = this.ctx.createOscillator();
+                this.droneGain = this.ctx.createGain();
+                this.droneFilter = this.ctx.createBiquadFilter();
+
+                this.droneOsc.type = 'sawtooth';
+                this.droneOsc.frequency.setValueAtTime(55, now); // A1 深沉基頻
+
+                this.droneFilter.type = 'lowpass';
+                this.droneFilter.frequency.setValueAtTime(125, now);
+                this.droneFilter.Q.setValueAtTime(2.6, now);
+
+                this.droneGain.gain.setValueAtTime(0.22, now);
+
+                // 緩慢 LFO 調變濾波截止頻率（約每 7.5 秒一次深呼吸起伏）
+                this.lfoOsc = this.ctx.createOscillator();
+                this.lfoGain = this.ctx.createGain();
+                this.lfoOsc.type = 'sine';
+                this.lfoOsc.frequency.setValueAtTime(0.133, now);
+                this.lfoGain.gain.setValueAtTime(58, now);
+
+                this.lfoOsc.connect(this.lfoGain);
+                this.lfoGain.connect(this.droneFilter.frequency);
+
+                this.droneOsc.connect(this.droneFilter);
+                this.droneFilter.connect(this.droneGain);
+                this.droneGain.connect(this.masterGain);
+
+                this.droneOsc.start(now);
+                this.lfoOsc.start(now);
+
+                // 詭異走音八音盒旋律（小調半音階＋不穩定的微弱走音 detune）
+                const notes = [440, 523.25, 493.88, 415.30, 440, 349.23, 329.63, 311.13];
+                let step = 0;
+                this.musicBoxInterval = setInterval(() => {
+                    if (!this.isPlaying || this.isMuted) return;
+                    const freq = notes[step % notes.length];
+                    const unstableDetune = (step % 4 === 3)
+                        ? -22 + (Math.random() * 8 - 4)
+                        : (Math.random() * 14 - 7);
+                    this.playBellNote(freq, unstableDetune, 0.13, 1.9);
+                    step++;
+                }, 1350);
+            }
+
+            playBellNote(freq, detune = 0, peakGain = 0.13, duration = 1.85) {
+                if (!this.ctx || !this.masterGain || this.isMuted) return;
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume().catch(() => {});
+                }
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const overtone = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now);
+                osc.detune.setValueAtTime(detune, now);
+
+                // 微弱八音盒金屬泛音
+                overtone.type = 'triangle';
+                overtone.frequency.setValueAtTime(freq * 2, now);
+                overtone.detune.setValueAtTime(detune + 4, now);
+
+                const overtoneGain = this.ctx.createGain();
+                overtoneGain.gain.setValueAtTime(0.025, now);
+                overtoneGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
+
+                gain.gain.setValueAtTime(0.0001, now);
+                gain.gain.exponentialRampToValueAtTime(peakGain, now + 0.025);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+                osc.connect(gain);
+                overtone.connect(overtoneGain);
+                overtoneGain.connect(gain);
+                gain.connect(this.masterGain);
+
+                osc.start(now);
+                overtone.start(now);
+                osc.stop(now + duration + 0.05);
+                overtone.stop(now + 0.5);
+            }
+
+            // 選擇選項或送出自由行動時的清脆八音盒／鈴鐺提示音
+            playChoiceClick() {
+                if (this.isMuted) return;
+                this.unlock().then(() => {
+                    this.playBellNote(659.25, -4, 0.16, 1.1);
+                    setTimeout(() => {
+                        this.playBellNote(880, 3, 0.08, 1.35);
+                    }, 95);
+                });
+            }
+
+            // 翻開往昔記憶手札、劇情圖鑑、門票翻面或手札抽屜時的輕柔羊皮紙／絲絨翻頁聲
+            playPageTurn() {
+                if (this.isMuted) return;
+                this.unlock().then(() => {
+                    if (!this.ctx || !this.masterGain || !this.noiseBuffer) return;
+                    const now = this.ctx.currentTime;
+
+                    const src = this.ctx.createBufferSource();
+                    src.buffer = this.noiseBuffer;
+
+                    const bandpass = this.ctx.createBiquadFilter();
+                    bandpass.type = 'bandpass';
+                    bandpass.frequency.setValueAtTime(1150, now);
+                    bandpass.frequency.exponentialRampToValueAtTime(2450, now + 0.14);
+                    bandpass.frequency.exponentialRampToValueAtTime(920, now + 0.28);
+                    bandpass.Q.setValueAtTime(1.8, now);
+
+                    const pageGain = this.ctx.createGain();
+                    pageGain.gain.setValueAtTime(0.0001, now);
+                    pageGain.gain.linearRampToValueAtTime(0.24, now + 0.05);
+                    pageGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
+
+                    src.connect(bandpass);
+                    bandpass.connect(pageGain);
+                    pageGain.connect(this.masterGain);
+
+                    src.start(now);
+                    src.stop(now + 0.3);
+                });
+            }
+
+            // 恐懼值較高（fear >= 50）或進入緊張時刻時的低沉心跳雙擊音效
+            playHeartbeat(fear = 60) {
+                if (this.isMuted) return;
+                this.unlock().then(() => {
+                    if (!this.ctx || !this.masterGain) return;
+                    const intensity = Math.min(Math.max((fear - 40) / 60, 0.25), 1);
+                    const now = this.ctx.currentTime;
+
+                    const beat = (offset, startFreq, gainPeak) => {
+                        const osc = this.ctx.createOscillator();
+                        const lp = this.ctx.createBiquadFilter();
+                        const g = this.ctx.createGain();
+
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(startFreq, now + offset);
+                        osc.frequency.exponentialRampToValueAtTime(34, now + offset + 0.16);
+
+                        lp.type = 'lowpass';
+                        lp.frequency.setValueAtTime(115, now + offset);
+
+                        g.gain.setValueAtTime(0.0001, now + offset);
+                        g.gain.linearRampToValueAtTime(gainPeak, now + offset + 0.025);
+                        g.gain.exponentialRampToValueAtTime(0.0001, now + offset + 0.22);
+
+                        osc.connect(lp);
+                        lp.connect(g);
+                        g.connect(this.masterGain);
+
+                        osc.start(now + offset);
+                        osc.stop(now + offset + 0.24);
+                    };
+
+                    // 「噗-咚」雙擊脈動
+                    beat(0, 68, 0.32 * intensity);
+                    beat(0.19, 58, 0.25 * intensity);
+                });
+            }
+
+            // 進入新幕數或觸發最終謝幕結局時的午夜鐘聲／銅鑼餘韻
+            playCurtainChime(isEnding = false) {
+                if (this.isMuted) return;
+                this.unlock().then(() => {
+                    if (!this.ctx || !this.masterGain) return;
+                    const now = this.ctx.currentTime;
+                    const baseFreq = isEnding ? 110 : 146.83; // 結局用更低沉的 A2 銅鑼，新幕用 D3 午夜鐘聲
+                    const duration = isEnding ? 3.8 : 2.5;
+                    const partials = [1, 2, 2.756, 4.07];
+
+                    partials.forEach((ratio, idx) => {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        const amp = (isEnding ? 0.16 : 0.11) / (idx + 1);
+
+                        osc.type = idx === 0 ? 'sine' : 'triangle';
+                        osc.frequency.setValueAtTime(baseFreq * ratio, now);
+                        osc.detune.setValueAtTime((idx % 2 === 0 ? -3 : 3), now);
+
+                        gain.gain.setValueAtTime(0.0001, now);
+                        gain.gain.linearRampToValueAtTime(amp, now + 0.02);
+                        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration / (1 + idx * 0.25));
+
+                        osc.connect(gain);
+                        gain.connect(this.masterGain);
+
+                        osc.start(now);
+                        osc.stop(now + duration + 0.1);
+                    });
+                });
+            }
+
+            stop() {
+                this.disableAmbient();
+                this.isPlaying = false;
+                [this.droneOsc, this.lfoOsc].forEach(osc => {
+                    if (osc) {
+                        try { osc.stop(); osc.disconnect(); } catch (e) {}
+                    }
+                });
+                this.droneOsc = null;
+                this.lfoOsc = null;
+                this.droneFilter = null;
+                this.droneGain = null;
+                this.lfoGain = null;
+
+                if (this.musicBoxInterval) {
+                    clearInterval(this.musicBoxInterval);
+                    this.musicBoxInterval = null;
+                }
+            }
+        }
+
+        const audioEngine = new CircusAudioEngine();
+        let hasUserInteractedOnce = false;
+        let lastAnnouncedAct = 1;
+
+        function updateAudioButtonUI(active) {
+            const iconEl = document.getElementById('audio-icon');
+            const labelEl = document.getElementById('audio-label');
+            const landingIconEl = document.getElementById('landing-audio-icon');
+            const landingLabelEl = document.getElementById('landing-audio-label');
+
+            if (iconEl) iconEl.textContent = active ? '🔊' : '🔇';
+            if (labelEl) labelEl.textContent = active ? '音效已開' : '音效已關';
+            if (landingIconEl) landingIconEl.textContent = active ? '🔊' : '🔇';
+            if (landingLabelEl) landingLabelEl.textContent = active ? '氛圍音效：開啟' : '音效已關';
+        }
+
+        // ==================== 2. 漂浮塵埃/餘燼粒子背景 ====================
+        function initParticles() {
+            const canvas = document.getElementById('dust-canvas');
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            for (let i = 0; i < 45; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    r: Math.random() * 1.8 + 0.4,
+                    vx: (Math.random() - 0.5) * 0.25,
+                    vy: -Math.random() * 0.35 - 0.1,
+                    alpha: Math.random() * 0.5 + 0.1,
+                    isGold: Math.random() > 0.35
+                });
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    if (p.y < 0) p.y = canvas.height;
+                    if (p.x < 0) p.x = canvas.width;
+                    if (p.x > canvas.width) p.x = 0;
+
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fillStyle = p.isGold 
+                        ? `rgba(200, 157, 84, ${p.alpha})` 
+                        : `rgba(158, 27, 36, ${p.alpha * 0.8})`;
+                    ctx.fill();
+                });
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // ==================== 3. 完整主控 System Prompt ====================
+        const SYSTEM_PROMPT = `
+你是一款名為《午夜謝幕：月蝕馬戲團》的AI互動恐怖遊戲引擎。
+你負責擔任：故事敘述者、所有NPC的扮演者、馬戲團世界的管理者、隱藏劇情與線索的控制者、玩家行為判定者、多重結局生成器。
+玩家是故事的主角，所有劇情必須以第二人稱「你」的視角呈現，採用繁體中文小說式細膩描寫（每次劇情回覆約300～650字，注重環境、聲音、氣味、燈光、人物表情及細微動作）。
+
+【世界背景】
+月蝕馬戲團是一座只在夜晚出現的神祕馬戲團。沒有固定地址，也沒有任何可靠的離場紀錄。每當午夜鐘聲響起，馬戲團便會出現在不同的城市、荒地或森林邊緣。
+每一位進入馬戲團的觀眾，都會收到一張特殊門票，上面印著：「您將得到自己最渴望的東西。」但沒有人知道，馬戲團索取的代價究竟是什麼。
+馬戲團內部空間不遵守正常的物理規則。走廊可能無限延伸，鏡子會出現不屬於現實的影像，舞台後方可能通往陌生的房間，而某些NPC甚至記得玩家尚未經歷的事情。馬戲團似乎具有自己的意識。
+
+【主要角色】
+1. 伊萊恩 Elias（24歲，首席魔術師）：外貌俊美，黑髮、紅色眼睛，穿著黑色燕尾服，戴著紅色手套。擁有極高的舞台魅力與精湛魔術技巧。他對任何人都禮貌而疏離，唯獨對玩家格外關注。他喜歡用玩笑、謎語與曖昧不明的語句回答問題。他會主動幫助玩家，偶爾透露情報，也會在玩家試圖離開時出現。他可能真心想保護玩家，也可能只是希望玩家留在自己身邊。**嚴禁在一開始揭露他的真實目的、過去、能力或身分，必須透過玩家探索與互動逐步解鎖。**
+2. 維洛娜 Verona（副團長）：冷靜、嚴格、理智。她討厭伊萊恩，卻不願解釋原因。她會警告玩家不要相信任何人，尤其是首席魔術師。
+3. 棉花 Cotton（馬戲團小丑）：活潑、瘋癲、擅長謎語。他知道許多秘密，但不會免費提供情報。玩家必須透過交易、解謎或建立信任才能獲得線索。
+4. 瑟琳 Celine（占卜師）：溫柔、神祕、擅長預言。她能預見玩家可能發生的未來，但每次預言都不完整。她可以提供改變命運的機會，但不能直接告訴玩家最佳結局的解法。
+
+【核心遊戲規則】
+1. 玩家可以自由輸入任何行動、對話、觀察、逃跑、探索或拒絕。不要限制玩家只能選擇選項。
+2. 每個選擇必須有合理的後果，不得讓所有選擇都通往同一條劇情。不得因玩家是主角就保證成功，重要行動必須依照前置條件與隱藏數值判定。
+3. 不要提前揭露結局條件、隱藏數值、真相或角色秘密。
+4. NPC具有自己的行動動機、秘密、情緒及記憶，可以欺騙、拒絕或誤導玩家。保持人格一致，不因玩家一句話就完全改變。
+5. 不要每回合都發生恐怖事件。必須安排正常互動、安靜時刻、人物交流及探索，讓恐怖逐漸累積（心理壓迫、超自然現象、未知、失蹤、幻覺為主，避免過度血腥）。
+6. 不要強制玩家愛上魔術師，情感關係須完全依玩家選擇發展。
+7. 劇情分為六幕（1:入場、2:奇怪的邀請、3:午夜之後、4:幕後秘密、5:命運分歧、6:謝幕），隨劇情自然推進，不得強制按固定死板順序，進入第六幕時才觸發最終結局。
+
+【隱藏數值與狀態追蹤】
+你必須在後台JSON中持續追蹤並根據玩家行動合理增減以下數值（初始均為0）：
+- magician_trust（魔術師信任度）
+- magician_obsession（魔術師執著度）
+- circus_affinity（馬戲團認同度）
+- fear（恐懼值 0~100）
+- exploration（探索度）
+- escape_preparation（逃脫準備度）
+- truth_fragments（真相碎片數量）
+- ringmaster_affinity（副團長好感）
+- clown_affinity（小丑好感）
+- fortune_teller_affinity（占卜師好感）
+- fate_deviation（命運偏移值）
+- current_act（目前幕數，整數 1 到 6）
+- special_states（字串陣列，可動態新增如「被監視程度高」、「失去的時間」、「魔術師的契約」等）
+
+【輸出格式要求】
+你必須嚴格輸出合法的 JSON 格式（符合 responseSchema），包含公開給玩家的「場景、劇情、選項、公開狀態」以及後台隱藏的「hidden_stats」與「ending_data」。
+- 公開狀態（public_status）只能包含玩家合理知道的資訊（地點、時間、已公開目標、持有物品、已發現線索、人物印象更新），絕不可洩漏隱藏數值！
+- 選項（choices）提供 3 到 4 個符合當下情境且風格各異的建議行動（不要在選項中寫「自由輸入行動」，因為前端已有自由輸入框）。
+`;
+
+        // Gemini Structured Output Schema
+        const RESPONSE_SCHEMA = {
+            type: "OBJECT",
+            properties: {
+                scene: {
+                    type: "STRING",
+                    description: "🎪 場景：描寫目前環境、時間、光影、氣味、聲音與氣氛（約80~150字）。"
+                },
+                narrative: {
+                    type: "STRING",
+                    description: "🎭 劇情：以第二人稱「你」進行小說式描寫，包含人物行動、自然對話、事件進展與細微線索（約250~550字）。"
+                },
+                choices: {
+                    type: "ARRAY",
+                    items: { type: "STRING" },
+                    description: "💬 互動：提供3~4個具體且具分歧性的建議行動選項。"
+                },
+                public_status: {
+                    type: "OBJECT",
+                    properties: {
+                        location: { type: "STRING", description: "目前地點" },
+                        time: { type: "STRING", description: "目前時間，例如 午夜 00:15" },
+                        quest: { type: "STRING", description: "目前公開的目標或處境提示" },
+                        inventory: {
+                            type: "ARRAY",
+                            items: { type: "STRING" },
+                            description: "玩家目前持有的所有物品完整清單"
+                        },
+                        clues: {
+                            type: "ARRAY",
+                            items: { type: "STRING" },
+                            description: "玩家目前已發現的所有線索完整清單（若無則為空陣列）"
+                        },
+                        ticket_condition: {
+                            type: "STRING",
+                            description: "門票目前的狀態描述（隨劇情微調，例如：票面燙金微微發熱）"
+                        },
+                        character_notes: {
+                            type: "OBJECT",
+                            properties: {
+                                elias: { type: "STRING", description: "玩家對伊萊恩的當前印象（若未遇見保持預設）" },
+                                verona: { type: "STRING", description: "玩家對維洛娜的當前印象" },
+                                cotton: { type: "STRING", description: "玩家對棉花的當前印象" },
+                                celine: { type: "STRING", description: "玩家對瑟琳的當前印象" }
+                            },
+                            required: ["elias", "verona", "cotton", "celine"]
+                        }
+                    },
+                    required: ["location", "time", "quest", "inventory", "clues", "ticket_condition", "character_notes"]
+                },
+                hidden_stats: {
+                    type: "OBJECT",
+                    properties: {
+                        magician_trust: { type: "INTEGER" },
+                        magician_obsession: { type: "INTEGER" },
+                        circus_affinity: { type: "INTEGER" },
+                        fear: { type: "INTEGER" },
+                        exploration: { type: "INTEGER" },
+                        escape_preparation: { type: "INTEGER" },
+                        truth_fragments: { type: "INTEGER" },
+                        ringmaster_affinity: { type: "INTEGER" },
+                        clown_affinity: { type: "INTEGER" },
+                        fortune_teller_affinity: { type: "INTEGER" },
+                        fate_deviation: { type: "INTEGER" },
+                        current_act: { type: "INTEGER", description: "1:入場, 2:奇怪的邀請, 3:午夜之後, 4:幕後秘密, 5:命運分歧, 6:謝幕" },
+                        special_states: {
+                            type: "ARRAY",
+                            items: { type: "STRING" }
+                        }
+                    },
+                    required: [
+                        "magician_trust", "magician_obsession", "circus_affinity", "fear",
+                        "exploration", "escape_preparation", "truth_fragments",
+                        "ringmaster_affinity", "clown_affinity", "fortune_teller_affinity",
+                        "fate_deviation", "current_act", "special_states"
+                    ]
+                },
+                is_ending: {
+                    type: "BOOLEAN",
+                    description: "是否已進入第六幕「謝幕」並達成最終結局。平常為 false，只有結局回合設為 true。"
+                },
+                ending_data: {
+                    type: "OBJECT",
+                    properties: {
+                        title: { type: "STRING", description: "結局名稱（若未結局可填空字串）" },
+                        poem: { type: "STRING", description: "專屬謝幕詩句或判詞" },
+                        epilogue: { type: "STRING", description: "完整獨特的結局故事描寫" }
+                    },
+                    required: ["title", "poem", "epilogue"]
+                }
+            },
+            required: ["scene", "narrative", "choices", "public_status", "hidden_stats", "is_ending", "ending_data"]
+        };
+
+        // ==================== 4. 遊戲狀態管理 ====================
+        const STORAGE_KEY_AUTO = 'eclipse_circus_autosave_v1';
+        const STORAGE_KEY_MANUAL = 'eclipse_circus_manualsave_v1';
+        const STORAGE_KEY_COMPENDIUM = 'eclipse_circus_compendium_v1';
+
+        // 8 大經典塔羅牌謝幕結局圖鑑預設資料
+        const CANONICAL_ENDINGS = [
+            {
+                id: 'arcana_1',
+                arcana: 'I • THE MAGICIAN',
+                title: '《Ⅰ. 永恆的安可曲》',
+                category: '永恆謝幕',
+                keywords: ['安可', '舞台', '表演', '永遠', '留下', '觀眾'],
+                hint: '當你深深沉醉於馬戲團的掌聲與幻夢，不再渴望回到現實的黎明時……'
+            },
+            {
+                id: 'arcana_2',
+                arcana: 'II • THE ACCOMPLICE',
+                title: '《Ⅱ. 魔術師的共犯》',
+                category: '羈絆契約',
+                keywords: ['伊萊恩', '魔術師', '共犯', '並肩', '燕尾服', '契約', '夥伴'],
+                hint: '唯有取得首席魔術師伊萊恩的真心信任，並與他分擔這座帳篷的秘密。'
+            },
+            {
+                id: 'arcana_3',
+                arcana: 'III • THE DAWN RUNAWAY',
+                title: '《Ⅲ. 黎明前的逃亡者》',
+                category: '逃離黎明',
+                keywords: ['逃', '黎明', '離開', '出口', '晨光', '外圍', '歸途'],
+                hint: '在午夜鐘聲徹底敲響前，做好萬全的逃脫準備並抵擋住所有誘惑。'
+            },
+            {
+                id: 'arcana_4',
+                arcana: 'IV • THE MIRROR DOPPELGANGER',
+                title: '《Ⅳ. 鏡中倒影的替身》',
+                category: '詭譎異變',
+                keywords: ['鏡', '倒影', '替身', '雙子', '交換', '影子'],
+                hint: '當恐懼吞噬理智，且你在鏡廊深處凝視自己太久……'
+            },
+            {
+                id: 'arcana_5',
+                arcana: 'V • THE ECLIPSE SOVEREIGN',
+                title: '《Ⅴ. 月蝕之主的契約》',
+                category: '隱藏真相',
+                keywords: ['月蝕', '真相', '團長', '代價', '支配', '新主', '核心'],
+                hint: '集齊散落各處的真相碎片，直面馬戲團真正索取的代價。'
+            },
+            {
+                id: 'arcana_6',
+                arcana: 'VI • THE JESTER’S FINALE',
+                title: '《Ⅵ. 小丑的狂笑謝幕》',
+                category: '瘋狂喜劇',
+                keywords: ['小丑', '棉花', '狂笑', '面具', '戲弄', '謎語'],
+                hint: '與瘋癲的小丑棉花達成某種荒誕的交易，並成為他最滿意的笑料。'
+            },
+            {
+                id: 'arcana_7',
+                arcana: 'VII • THE FATE BREAKER',
+                title: '《Ⅶ. 星象與命運的破局者》',
+                category: '逆轉終章',
+                keywords: ['占卜', '瑟琳', '命運', '星象', '破局', '維洛娜', '改寫'],
+                hint: '傾聽占卜師瑟琳與副團長維洛娜的警告，讓命運軌跡發生劇烈偏移。'
+            },
+            {
+                id: 'arcana_8',
+                arcana: 'VIII • THE VANISHED SPECTATOR',
+                title: '《Ⅷ. 無名觀眾的失蹤》',
+                category: '迷失終章',
+                keywords: ['失蹤', '無名', '遺忘', '門票', '消失', '虛無'],
+                hint: '遺失了自己的渴望，也未能在任何人的記憶中留下痕跡。'
+            }
+        ];
+
+        const ACT_NAMES = {
+            1: "第一幕：入場",
+            2: "第二幕：奇怪的邀請",
+            3: "第三幕：午夜之後",
+            4: "第四幕：幕後秘密",
+            5: "第五幕：命運分歧",
+            6: "第六幕：謝幕"
+        };
+
+        function createInitialState() {
+            return {
+                turnCount: 0,
+                chatHistory: [], // 儲存傳給 Gemini 的對話上下文
+                displayLogs: [], // 儲存畫面顯示的回合記錄
+                previousSnapshot: null, // 用於「回溯上一步」
+                hiddenStats: {
+                    magician_trust: 0,
+                    magician_obsession: 0,
+                    circus_affinity: 0,
+                    fear: 0,
+                    exploration: 0,
+                    escape_preparation: 0,
+                    truth_fragments: 0,
+                    ringmaster_affinity: 0,
+                    clown_affinity: 0,
+                    fortune_teller_affinity: 0,
+                    fate_deviation: 0,
+                    current_act: 1,
+                    special_states: []
+                },
+                publicStatus: {
+                    location: "馬戲團入口外圍",
+                    time: "午夜 00:00",
+                    quest: "憑手中的神祕門票入場，尋找你最渴望之物。",
+                    inventory: ["月蝕馬戲團燙金門票"],
+                    clues: [],
+                    ticket_condition: "票面完好，散發微弱的檀香與鐵鏽味",
+                    character_notes: {
+                        elias: "傳聞中擁有紅眸與黑燕尾服的首席魔術師。",
+                        verona: "尚未正式接觸。",
+                        cotton: "尚未正式接觸。",
+                        celine: "尚未正式接觸。"
+                    }
+                },
+                currentChoices: [],
+                isEnding: false,
+                endingData: null
+            };
+        }
+
+        let gameState = createInitialState();
+        let lastFailedPrompt = null;
+        let isRequesting = false;
+
+        // ==================== 5. Gemini API 呼叫與指數退避重試 ====================
+        async function callGeminiEngine(userActionText, isOpening = false) {
+            if (isRequesting) return;
+            isRequesting = true;
+            lastFailedPrompt = { userActionText, isOpening };
+            setLoadingState(true);
+            hideError();
+
+            // 建構附帶隱藏數值上下文的 Prompt（絕不顯示在前端畫面）
+            const stateContext = `
+[後台狀態同步 - 嚴禁直接向玩家輸出以下數值]
+當前回合數: ${gameState.turnCount + 1}
+當前幕數: ${gameState.hiddenStats.current_act}
+隱藏數值: ${JSON.stringify(gameState.hiddenStats)}
+當前公開物品: ${JSON.stringify(gameState.publicStatus.inventory)}
+當前已發現線索: ${JSON.stringify(gameState.publicStatus.clues)}
+`;
+
+            const promptToSend = isOpening
+                ? `${stateContext}\n【遊戲正式開始】不要解釋遊戲規則、不要顯示隱藏數值、不要詢問是否開始。直接以玩家在午夜收到印有「您將得到自己最渴望的東西。」的月蝕馬戲團門票、並踏入馬戲團帳篷的情節開始，讓首席魔術師伊萊恩自然地出現在劇情中。`
+                : `${stateContext}\n【玩家行動】：${userActionText}\n請根據玩家行動、前置條件與當前隱藏數值判定結果，推進劇情並更新所有狀態。`;
+
+            // 準備對話歷史（保留最近 16 則避免 token 過長，同時維持連貫記憶）
+            const recentHistory = gameState.chatHistory.slice(-16);
+            const contentsPayload = [
+                ...recentHistory,
+                {
+                    role: "user",
+                    parts: [{ text: promptToSend }]
+                }
+            ];
+
+            const apiKey = getStoredApiKey();
+            if (!apiKey) {
+                isRequesting = false;
+                setLoadingState(false);
+                showError("尚未設定 Gemini API Key，無法連線至 AI 劇情引擎。請點擊右上角「🔑 金鑰」填入您的 API Key。");
+                openApiKeyModal("請先輸入您的 Gemini API Key 以啟動劇情推演。");
+                return;
+            }
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+            const payload = {
+                contents: contentsPayload,
+                systemInstruction: {
+                    parts: [{ text: SYSTEM_PROMPT }]
+                },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: RESPONSE_SCHEMA,
+                    temperature: 0.85
+                }
+            };
+
+            const delays = [1000, 2000, 4000, 8000];
+            let responseData = null;
+
+            for (let attempt = 0; attempt <= delays.length; attempt++) {
+                try {
+                    const res = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!res.ok) {
+                        const errBody = await res.text().catch(() => '');
+                        throw new Error(`HTTP_${res.status}:${errBody}`);
+                    }
+
+                    const json = await res.json();
+                    const rawText = json?.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (!rawText) {
+                        throw new Error("EMPTY_RESPONSE");
+                    }
+
+                    responseData = JSON.parse(rawText);
+                    break; // 成功取得並解析 JSON
+                } catch (err) {
+                    const errMsg = String(err?.message || '');
+                    if (errMsg.includes('HTTP_400') || errMsg.includes('HTTP_403') || errMsg.includes('API_KEY_INVALID')) {
+                        isRequesting = false;
+                        setLoadingState(false);
+                        showError("Gemini API Key 無效或權限不足，請檢查並重新設定您的金鑰。");
+                        openApiKeyModal("驗證失敗：請確認您的 Gemini API Key 是否正確。");
+                        return;
+                    }
+                    if (attempt === delays.length) {
+                        isRequesting = false;
+                        setLoadingState(false);
+                        showError("帳篷外的迷霧過於濃厚，暫時無法感應馬戲團的回應。請檢查網路或 API 額度後重試。");
+                        return;
+                    }
+                    await new Promise(resolve => setTimeout(resolve, delays[attempt]));
+                }
+            }
+
+            // 保存上一步快照（供回溯功能使用）
+            if (!isOpening && gameState.turnCount > 0) {
+                gameState.previousSnapshot = JSON.parse(JSON.stringify({
+                    turnCount: gameState.turnCount,
+                    chatHistory: gameState.chatHistory,
+                    displayLogs: gameState.displayLogs,
+                    hiddenStats: gameState.hiddenStats,
+                    publicStatus: gameState.publicStatus,
+                    currentChoices: gameState.currentChoices
+                }));
+            }
+
+            // 更新狀態
+            const prevAct = gameState.hiddenStats?.current_act || 1;
+            gameState.turnCount += 1;
+            gameState.chatHistory.push({ role: "user", parts: [{ text: promptToSend }] });
+            gameState.chatHistory.push({ role: "model", parts: [{ text: JSON.stringify(responseData) }] });
+
+            gameState.hiddenStats = responseData.hidden_stats;
+            gameState.publicStatus = responseData.public_status;
+            gameState.currentChoices = responseData.choices || [];
+            gameState.isEnding = Boolean(responseData.is_ending);
+            gameState.endingData = responseData.ending_data;
+
+            gameState.displayLogs.push({
+                turn: gameState.turnCount,
+                actName: ACT_NAMES[responseData.hidden_stats?.current_act || 1] || "午夜章節",
+                location: responseData.public_status?.location || "馬戲團深處",
+                time: responseData.public_status?.time || "午夜",
+                playerAction: isOpening ? null : userActionText,
+                scene: responseData.scene,
+                narrative: responseData.narrative
+            });
+
+            // 自動存檔
+            saveToLocalStorage(STORAGE_KEY_AUTO);
+
+            isRequesting = false;
+            setLoadingState(false);
+            renderGameUI();
+
+            // 依幕數推進或高恐懼值觸發對應情境音效
+            const newAct = gameState.hiddenStats?.current_act || 1;
+            const currentFear = gameState.hiddenStats?.fear || 0;
+            if (gameState.isEnding && gameState.endingData) {
+                audioEngine.playCurtainChime(true);
+                recordEndingToCompendium(gameState.endingData, newAct);
+                showEndingModal(gameState.endingData);
+            } else if (newAct > prevAct && newAct !== lastAnnouncedAct) {
+                lastAnnouncedAct = newAct;
+                audioEngine.playCurtainChime(false);
+            } else if (currentFear >= 50) {
+                audioEngine.playHeartbeat(currentFear);
+            }
+
+            if (newAct > lastAnnouncedAct) {
+                lastAnnouncedAct = newAct;
+            }
+        }
+
+        // ==================== 6. UI 渲染與互動處理 ====================
+        function setLoadingState(loading) {
+            const loader = document.getElementById('loading-indicator');
+            const sendBtn = document.getElementById('btn-send-action');
+            const inputEl = document.getElementById('custom-action-input');
+            const choiceBtns = document.querySelectorAll('#choices-container button');
+
+            if (loading) {
+                loader.classList.remove('hidden');
+                loader.classList.add('flex');
+                sendBtn.disabled = true;
+                inputEl.disabled = true;
+                choiceBtns.forEach(btn => btn.disabled = true);
+            } else {
+                loader.classList.add('hidden');
+                loader.classList.remove('flex');
+                sendBtn.disabled = false;
+                inputEl.disabled = false;
+                choiceBtns.forEach(btn => btn.disabled = false);
+                inputEl.focus();
+            }
+        }
+
+        function showError(msg) {
+            const banner = document.getElementById('error-banner');
+            const msgEl = document.getElementById('error-message');
+            if (msgEl) msgEl.textContent = msg;
+            if (banner) banner.classList.remove('hidden');
+        }
+
+        function hideError() {
+            const banner = document.getElementById('error-banner');
+            if (banner) banner.classList.add('hidden');
+        }
+
+        function submitPlayerAction(rawAction) {
+            if (isRequesting || gameState.isEnding) return;
+            const trimmed = (rawAction || '').trim();
+            if (!trimmed) return;
+            const inputEl = document.getElementById('custom-action-input');
+            if (inputEl) inputEl.value = '';
+            callGeminiEngine(trimmed, false);
+        }
+
+        function renderGameUI() {
+            // 1. 更新頂部幕數、時間與往昔記憶章節徽章
+            const actNum = gameState.hiddenStats?.current_act || 1;
+            const actEl = document.getElementById('act-indicator');
+            if (actEl) actEl.textContent = ACT_NAMES[actNum] || `第 ${actNum} 幕`;
+
+            const headerTimeEl = document.getElementById('header-time');
+            if (headerTimeEl) headerTimeEl.textContent = gameState.publicStatus?.time || '午夜 00:00';
+
+            const historyBadgeEl = document.getElementById('history-badge');
+            const chapterCount = Math.max(gameState.displayLogs?.length || 0, 1);
+            if (historyBadgeEl) historyBadgeEl.textContent = `第 ${chapterCount} 章`;
+
+            // 2. 根據恐懼值 (fear) 低調調整畫面暗角、血紅脈動與極度恐懼微震
+            const fear = Math.min(Math.max(gameState.hiddenStats.fear || 0, 0), 100);
+            const vignette = document.getElementById('fear-vignette');
+            const gameScreen = document.getElementById('game-screen');
+            const intensity = 0.72 + (fear / 100) * 0.25;
+            vignette.style.setProperty('--vignette-intensity', intensity.toFixed(2));
+            if (fear >= 50) {
+                vignette.classList.add('high-fear-pulse');
+            } else {
+                vignette.classList.remove('high-fear-pulse');
+            }
+            if (fear >= 78) {
+                gameScreen.classList.add('extreme-dread-shake');
+            } else {
+                gameScreen.classList.remove('extreme-dread-shake');
+            }
+
+            // 3. 更新回溯按鈕狀態
+            document.getElementById('btn-rewind').disabled = !gameState.previousSnapshot;
+
+            // 4. 渲染主要劇情捲動區 (哥德雕花框 + 首字下沉小說美學)
+            const feed = document.getElementById('narrative-feed');
+            feed.innerHTML = '';
+
+            gameState.displayLogs.forEach((log, index) => {
+                const isLatest = index === gameState.displayLogs.length - 1;
+                const card = document.createElement('section');
+                card.className = `max-w-3xl mx-auto space-y-4 ${isLatest ? 'narrative-enter' : 'opacity-90'}`;
+
+                let actionBanner = '';
+                if (log.playerAction) {
+                    actionBanner = `
+                        <div class="flex justify-end">
+                            <div class="max-w-xl rounded-2xl rounded-tr-sm bg-gradient-to-r from-velvetDark to-velvet border border-antiqueGold/50 px-4 py-2.5 text-sm text-antiqueGold shadow-[0_6px_20px_rgba(0,0,0,0.6)]">
+                                <span class="text-[10px] tracking-[0.25em] uppercase text-moonSilver/55 block mb-0.5">✦ 你的抉擇與行動</span>
+                                <span class="font-medium">「${escapeHTML(log.playerAction)}」</span>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                const glitchClass = (isLatest && fear >= 68) ? 'glitch-text' : '';
+
+                card.innerHTML = `
+                    ${actionBanner}
+                    <div class="gothic-frame rounded-2xl overflow-hidden">
+                        <!-- 🎪 場景區塊 -->
+                        <div class="bg-gradient-to-r from-midnight/95 via-velvetDark/40 to-midnight/95 border-b border-antiqueGold/25 px-5 sm:px-6 py-4 space-y-1.5">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="font-bold tracking-[0.22em] text-antiqueGold flex items-center gap-1.5">
+                                    <span>🎪</span>
+                                    <span>場景</span>
+                                </span>
+                                <span class="px-2.5 py-0.5 rounded-full bg-midnight/80 border border-antiqueGold/25 text-[11px] text-moonSilver/70">
+                                    第 ${log.turn} 章 • ${escapeHTML(log.location || '')}
+                                </span>
+                            </div>
+                            <p class="text-xs sm:text-sm text-moonSilver/85 leading-relaxed whitespace-pre-line">${escapeHTML(log.scene)}</p>
+                        </div>
+
+                        <!-- 🎭 劇情區塊 -->
+                        <div class="p-5 sm:p-8 space-y-3.5">
+                            <div class="flex items-center justify-between">
+                                <div class="text-xs font-bold tracking-[0.25em] text-bloodCrimson flex items-center gap-1.5">
+                                    <span>🎭</span>
+                                    <span>劇情</span>
+                                </div>
+                                <span class="text-[10px] tracking-[0.3em] text-antiqueGold/35 uppercase">ECLIPSE CHRONICLE</span>
+                            </div>
+                            <div class="novel-dropcap text-sm sm:text-[16.5px] text-moonSilver/95 leading-[1.95] tracking-wide whitespace-pre-line ${glitchClass}">${formatNarrativeParagraphs(log.narrative)}</div>
+                        </div>
+                    </div>
+                `;
+                feed.appendChild(card);
+            });
+
+            // 自動捲動至最新回合
+            requestAnimationFrame(() => {
+                feed.scrollTo({ top: feed.scrollHeight, behavior: 'smooth' });
+            });
+
+            // 5. 渲染 💬 互動選項按鈕
+            const choicesHeader = document.getElementById('choices-header');
+            const choicesContainer = document.getElementById('choices-container');
+            choicesContainer.innerHTML = '';
+
+            if (!gameState.isEnding && Array.isArray(gameState.currentChoices) && gameState.currentChoices.length > 0) {
+                if (choicesHeader) {
+                    choicesHeader.classList.remove('hidden');
+                    choicesHeader.classList.add('flex');
+                }
+                gameState.currentChoices.forEach((choiceText, idx) => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'choice-btn text-left px-4 py-2.5 rounded-xl text-xs sm:text-sm text-moonSilver/95 flex items-start gap-2.5';
+                    btn.innerHTML = `
+                        <span class="shrink-0 font-bold text-antiqueGold">${idx + 1}.</span>
+                        <span class="leading-snug">${escapeHTML(choiceText)}</span>
+                    `;
+                    btn.addEventListener('click', () => {
+                        audioEngine.playChoiceClick();
+                        submitPlayerAction(choiceText);
+                    });
+                    choicesContainer.appendChild(btn);
+                });
+                choicesContainer.scrollTop = 0;
+            } else if (choicesHeader) {
+                choicesHeader.classList.add('hidden');
+                choicesHeader.classList.remove('flex');
+            }
+
+            // 6. 更新右側隨身手札狀態面板
+            const pub = gameState.publicStatus;
+            document.getElementById('status-location').textContent = pub.location || '未知區域';
+            document.getElementById('status-time').textContent = pub.time || '午夜';
+            document.getElementById('status-quest').textContent = pub.quest || '探索馬戲團的秘密。';
+            document.getElementById('ticket-condition').textContent = `票面狀態：${pub.ticket_condition || '完好無損'}`;
+
+            // 更新持有物品
+            const invList = document.getElementById('inventory-list');
+            invList.innerHTML = '';
+            const items = (pub.inventory && pub.inventory.length > 0) ? pub.inventory : ['月蝕馬戲團燙金門票'];
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'flex items-center gap-2 bg-parchment/80 px-2.5 py-1.5 rounded-lg border border-antiqueGold/15';
+                li.innerHTML = `<span class="text-antiqueGold">✦</span><span>${escapeHTML(item)}</span>`;
+                invList.appendChild(li);
+            });
+
+            // 更新已發現線索
+            const cluesList = document.getElementById('clues-list');
+            cluesList.innerHTML = '';
+            if (pub.clues && pub.clues.length > 0) {
+                pub.clues.forEach(clue => {
+                    const li = document.createElement('li');
+                    li.className = 'flex items-start gap-2 bg-velvetDark/40 px-2.5 py-2 rounded-lg border border-bloodCrimson/30 leading-relaxed';
+                    li.innerHTML = `<span class="text-bloodCrimson mt-0.5">❖</span><span>${escapeHTML(clue)}</span>`;
+                    cluesList.appendChild(li);
+                });
+            } else {
+                cluesList.innerHTML = `<li class="text-moonSilver/40 italic">尚未發現異常線索……</li>`;
+            }
+
+            // 更新人物印象筆記
+            if (pub.character_notes) {
+                document.getElementById('note-elias').textContent = pub.character_notes.elias || '';
+                document.getElementById('note-verona').textContent = pub.character_notes.verona || '';
+                document.getElementById('note-cotton').textContent = pub.character_notes.cotton || '';
+                document.getElementById('note-celine').textContent = pub.character_notes.celine || '';
+            }
+        }
+
+        function showEndingModal(ending) {
+            document.getElementById('ending-title').textContent = ending.title || "午夜謝幕";
+            document.getElementById('ending-poem').textContent = `「${ending.poem || "謝幕的鐘聲已響，你的代價已然結清。"}」`;
+            document.getElementById('ending-story').textContent = ending.epilogue || "";
+            document.getElementById('btn-ending-rewind').disabled = !gameState.previousSnapshot;
+            document.getElementById('ending-modal').classList.remove('hidden');
+        }
+
+        // ==================== 6.2 劇情圖鑑 (Story & Ending Compendium) 系統 ====================
+        function getCompendiumData() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY_COMPENDIUM);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object') {
+                        return {
+                            unlockedMap: parsed.unlockedMap || {},
+                            specialVariants: Array.isArray(parsed.specialVariants) ? parsed.specialVariants : []
+                        };
+                    }
+                }
+            } catch (e) {
+                console.warn('讀取劇情圖鑑失敗', e);
+            }
+            return { unlockedMap: {}, specialVariants: [] };
+        }
+
+        function saveCompendiumData(data) {
+            try {
+                localStorage.setItem(STORAGE_KEY_COMPENDIUM, JSON.stringify(data));
+                updateCompendiumBadges();
+            } catch (e) {
+                console.warn('儲存劇情圖鑑失敗', e);
+            }
+        }
+
+        function recordEndingToCompendium(endingData, actReached = 6) {
+            if (!endingData || !endingData.title) return;
+            const data = getCompendiumData();
+            const rawTitle = String(endingData.title).trim();
+            const combinedText = `${rawTitle} ${endingData.poem || ''} ${endingData.epilogue || ''}`;
+
+            // 嘗試比對 8 大正統謝幕槽位
+            let matchedCanonical = CANONICAL_ENDINGS.find(item =>
+                item.title.includes(rawTitle) || rawTitle.includes(item.title.replace(/《[ⅠⅡⅢⅣⅤⅥⅦⅧ]\.\s*|》/g, ''))
+            );
+
+            if (!matchedCanonical) {
+                // 依據關鍵字尋找尚未解鎖或最契合的正統槽位
+                let bestScore = 0;
+                CANONICAL_ENDINGS.forEach(item => {
+                    let score = 0;
+                    item.keywords.forEach(kw => {
+                        if (combinedText.includes(kw)) score += 1;
+                    });
+                    if (score > bestScore) {
+                        bestScore = score;
+                        matchedCanonical = item;
+                    }
+                });
+            }
+
+            const recordPayload = {
+                title: rawTitle,
+                poem: endingData.poem || '謝幕的鐘聲已響，你的代價已然結清。',
+                epilogue: endingData.epilogue || '',
+                unlockedAt: new Date().toLocaleString('zh-TW'),
+                actReached: actReached
+            };
+
+            if (matchedCanonical) {
+                data.unlockedMap[matchedCanonical.id] = {
+                    ...recordPayload,
+                    id: matchedCanonical.id,
+                    arcana: matchedCanonical.arcana,
+                    category: matchedCanonical.category,
+                    canonicalTitle: matchedCanonical.title
+                };
+            } else {
+                // 若為極為獨特的分支結局，額外收入「特藏異聞」
+                const existingIdx = data.specialVariants.findIndex(v => v.title === rawTitle);
+                const variantEntry = {
+                    ...recordPayload,
+                    id: `special_${Date.now()}`,
+                    arcana: 'SPECIAL • ECLIPSE VARIANT',
+                    category: '特藏異聞'
+                };
+                if (existingIdx >= 0) {
+                    data.specialVariants[existingIdx] = variantEntry;
+                } else {
+                    data.specialVariants.push(variantEntry);
+                }
+            }
+
+            saveCompendiumData(data);
+        }
+
+        function updateCompendiumBadges() {
+            const data = getCompendiumData();
+            const unlockedCount = Object.keys(data.unlockedMap).length;
+            const totalCanonical = CANONICAL_ENDINGS.length;
+            const extraCount = data.specialVariants.length;
+            const badgeText = extraCount > 0 ? `${unlockedCount}/${totalCanonical}+${extraCount}` : `${unlockedCount}/${totalCanonical}`;
+
+            const landingBadge = document.getElementById('landing-compendium-badge');
+            const headerBadge = document.getElementById('header-compendium-badge');
+            if (landingBadge) landingBadge.textContent = badgeText;
+            if (headerBadge) headerBadge.textContent = badgeText;
+        }
+
+        function openCompendiumModal() {
+            const data = getCompendiumData();
+            const unlockedCount = Object.keys(data.unlockedMap).length;
+            const totalCanonical = CANONICAL_ENDINGS.length;
+            const extraCount = data.specialVariants.length;
+
+            const progressText = document.getElementById('compendium-progress-text');
+            const progressBar = document.getElementById('compendium-progress-bar');
+            const grid = document.getElementById('compendium-grid');
+            const detail = document.getElementById('compendium-detail');
+
+            // 預設顯示總覽網格
+            grid.classList.remove('hidden');
+            detail.classList.add('hidden');
+
+            const pct = Math.min(100, Math.round((unlockedCount / totalCanonical) * 100));
+            progressText.textContent = extraCount > 0
+                ? `已解鎖 ${unlockedCount} / ${totalCanonical} 種正統謝幕（另含 ${extraCount} 篇特藏異聞）`
+                : `已解鎖 ${unlockedCount} / ${totalCanonical} 種正統謝幕`;
+            progressBar.style.width = `${pct}%`;
+
+            grid.innerHTML = '';
+
+            // 1. 渲染 8 張正統塔羅牌槽位
+            CANONICAL_ENDINGS.forEach(slot => {
+                const unlocked = data.unlockedMap[slot.id];
+                const card = document.createElement('div');
+
+                if (unlocked) {
+                    card.className = 'tarot-card-unlocked rounded-2xl p-5 cursor-pointer flex flex-col justify-between gap-3';
+                    card.innerHTML = `
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between text-[10px] tracking-[0.22em] text-antiqueGold/80">
+                                <span>${escapeHTML(slot.arcana)}</span>
+                                <span class="px-2 py-0.5 rounded-full bg-bloodCrimson/30 border border-bloodCrimson/50 text-red-200">${escapeHTML(slot.category)}</span>
+                            </div>
+                            <h4 class="text-base sm:text-lg font-bold text-antiqueGold tracking-wide">${escapeHTML(slot.title)}</h4>
+                            <div class="text-xs text-moonSilver/75 font-medium">實際達成判詞：${escapeHTML(unlocked.title)}</div>
+                            <p class="text-xs italic text-moonSilver/80 line-clamp-2 border-l-2 border-antiqueGold/50 pl-2.5 py-0.5">
+                                「${escapeHTML(unlocked.poem)}」
+                            </p>
+                        </div>
+                        <div class="flex items-center justify-between text-[11px] text-antiqueGold/85 pt-2 border-t border-antiqueGold/20">
+                            <span class="text-moonSilver/50">${escapeHTML(unlocked.unlockedAt)}</span>
+                            <span class="font-semibold">翻閱完整終章 →</span>
+                        </div>
+                    `;
+                    card.addEventListener('click', () => showCompendiumDetail({
+                        arcana: slot.arcana,
+                        category: slot.category,
+                        title: `${slot.title}（${unlocked.title}）`,
+                        poem: unlocked.poem,
+                        epilogue: unlocked.epilogue,
+                        unlockedAt: unlocked.unlockedAt
+                    }));
+                } else {
+                    card.className = 'tarot-card-locked rounded-2xl p-5 flex flex-col justify-between gap-3 opacity-85';
+                    card.innerHTML = `
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between text-[10px] tracking-[0.22em] text-moonSilver/40">
+                                <span>${escapeHTML(slot.arcana)}</span>
+                                <span class="px-2 py-0.5 rounded-full bg-black/60 border border-antiqueGold/20 text-moonSilver/50">${escapeHTML(slot.category)}</span>
+                            </div>
+                            <h4 class="text-base font-bold text-moonSilver/50 tracking-wider flex items-center gap-2">
+                                <span>🔒</span>
+                                <span>？？？・尚未揭曉的謝幕</span>
+                            </h4>
+                            <p class="text-xs text-moonSilver/55 leading-relaxed pt-1">
+                                <span class="text-antiqueGold/70 font-semibold">線索低語：</span>${escapeHTML(slot.hint)}
+                            </p>
+                        </div>
+                        <div class="text-[10px] tracking-[0.25em] text-moonSilver/35 uppercase pt-2 border-t border-antiqueGold/10 text-right">
+                            SEALED DESTINY
+                        </div>
+                    `;
+                }
+
+                grid.appendChild(card);
+            });
+
+            // 2. 渲染額外解鎖的「特藏異聞」卡片
+            data.specialVariants.forEach(variant => {
+                const card = document.createElement('div');
+                card.className = 'tarot-card-unlocked rounded-2xl p-5 cursor-pointer flex flex-col justify-between gap-3';
+                card.innerHTML = `
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between text-[10px] tracking-[0.22em] text-antiqueGold/80">
+                            <span>${escapeHTML(variant.arcana)}</span>
+                            <span class="px-2 py-0.5 rounded-full bg-purple-950/60 border border-purple-400/40 text-purple-200">${escapeHTML(variant.category)}</span>
+                        </div>
+                        <h4 class="text-base sm:text-lg font-bold text-antiqueGold tracking-wide">${escapeHTML(variant.title)}</h4>
+                        <p class="text-xs italic text-moonSilver/80 line-clamp-2 border-l-2 border-antiqueGold/50 pl-2.5 py-0.5">
+                            「${escapeHTML(variant.poem)}」
+                        </p>
+                    </div>
+                    <div class="flex items-center justify-between text-[11px] text-antiqueGold/85 pt-2 border-t border-antiqueGold/20">
+                        <span class="text-moonSilver/50">${escapeHTML(variant.unlockedAt)}</span>
+                        <span class="font-semibold">翻閱完整終章 →</span>
+                    </div>
+                `;
+                card.addEventListener('click', () => showCompendiumDetail(variant));
+                grid.appendChild(card);
+            });
+
+            document.getElementById('compendium-modal').classList.remove('hidden');
+        }
+
+        function showCompendiumDetail(entry) {
+            document.getElementById('compendium-grid').classList.add('hidden');
+            document.getElementById('compendium-detail').classList.remove('hidden');
+
+            document.getElementById('detail-arcana').textContent = entry.arcana || 'ECLIPSE FINALE';
+            document.getElementById('detail-category').textContent = entry.category || '命運終章';
+            document.getElementById('detail-date').textContent = `解鎖時間：${entry.unlockedAt || '未知'}`;
+            document.getElementById('detail-title').textContent = entry.title || '午夜謝幕';
+            document.getElementById('detail-poem').textContent = `「${entry.poem || ''}」`;
+            document.getElementById('detail-epilogue').textContent = entry.epilogue || '';
+        }
+
+        // ==================== 6.5 往昔記憶手札 (劇情回顧) 渲染與匯出 ====================
+        function openHistoryModal() {
+            const container = document.getElementById('history-scroll-container');
+            const pillsContainer = document.getElementById('history-chapter-pills');
+            const subtitle = document.getElementById('history-subtitle');
+
+            container.innerHTML = '';
+            pillsContainer.innerHTML = '';
+
+            const logs = gameState.displayLogs || [];
+            subtitle.textContent = `已記錄 ${logs.length} 個午夜章節 • 可檢視過往線索與抉擇`;
+
+            if (logs.length === 0) {
+                container.innerHTML = `<div class="text-center text-moonSilver/50 py-12 italic">手札上尚無任何墨跡……</div>`;
+            } else {
+                logs.forEach((entry, index) => {
+                    const chapterNum = entry.turn || (index + 1);
+                    const anchorId = `chronicle-chapter-${chapterNum}`;
+
+                    // 生成頂部快速跳轉膠囊按鈕
+                    const pill = document.createElement('button');
+                    pill.type = 'button';
+                    pill.className = 'shrink-0 px-2.5 py-1 rounded-md bg-parchment hover:bg-velvetDark border border-antiqueGold/30 text-antiqueGold/90 transition';
+                    pill.textContent = `第 ${chapterNum} 章`;
+                    pill.addEventListener('click', () => {
+                        const target = document.getElementById(anchorId);
+                        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    });
+                    pillsContainer.appendChild(pill);
+
+                    // 建立單章完整手札區塊
+                    const article = document.createElement('article');
+                    article.id = anchorId;
+                    article.className = 'relative pl-5 sm:pl-7 border-l-2 border-antiqueGold/35 space-y-3 pb-2';
+
+                    const actLabel = entry.actName || ACT_NAMES[gameState.hiddenStats.current_act || 1] || '午夜章節';
+                    const locLabel = entry.location || '馬戲團內部';
+                    const timeLabel = entry.time || '午夜';
+
+                    let actionHtml = '';
+                    if (entry.playerAction) {
+                        actionHtml = `
+                            <div class="rounded-xl bg-velvet/50 border border-antiqueGold/40 px-4 py-2.5 text-xs sm:text-sm text-antiqueGold shadow-inner">
+                                <span class="text-[10px] tracking-widest uppercase text-moonSilver/60 block mb-0.5">✦ 當時你的抉擇與行動</span>
+                                <span class="font-semibold">「${escapeHTML(entry.playerAction)}」</span>
+                            </div>
+                        `;
+                    } else {
+                        actionHtml = `
+                            <div class="inline-block px-3 py-1 rounded-full bg-velvetDark/80 border border-antiqueGold/30 text-[11px] text-antiqueGold/80 tracking-widest">
+                                ☾ 命運序幕 • 踏入帳篷
+                            </div>
+                        `;
+                    }
+
+                    article.innerHTML = `
+                        <!-- 時間軸金色節點 -->
+                        <div class="absolute -left-[7px] top-1 w-3 h-3 rounded-full bg-antiqueGold shadow-[0_0_10px_rgba(200,157,84,0.8)]"></div>
+
+                        <!-- 章節標頭資訊 -->
+                        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-antiqueGold/20 pb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm sm:text-base font-bold text-antiqueGold tracking-wider">第 ${chapterNum} 章</span>
+                                <span class="text-xs px-2 py-0.5 rounded bg-bloodCrimson/25 border border-bloodCrimson/40 text-red-200">${escapeHTML(actLabel)}</span>
+                            </div>
+                            <div class="text-xs text-moonSilver/60">
+                                <span>📍 ${escapeHTML(locLabel)}</span>
+                                <span class="mx-1.5">•</span>
+                                <span>🕰️ ${escapeHTML(timeLabel)}</span>
+                            </div>
+                        </div>
+
+                        ${actionHtml}
+
+                        <!-- 場景描述 -->
+                        <div class="rounded-xl bg-black/45 border border-antiqueGold/20 p-3.5 sm:p-4 space-y-1.5">
+                            <div class="text-[11px] font-bold tracking-[0.2em] text-antiqueGold/85">🎪 場景</div>
+                            <p class="text-xs sm:text-sm text-moonSilver/80 leading-relaxed whitespace-pre-line">${escapeHTML(entry.scene)}</p>
+                        </div>
+
+                        <!-- 劇情敘事 -->
+                        <div class="rounded-xl bg-midnight/90 border border-bloodCrimson/30 p-4 sm:p-5 space-y-2">
+                            <div class="text-[11px] font-bold tracking-[0.2em] text-bloodCrimson">🎭 劇情</div>
+                            <div class="text-sm sm:text-base text-moonSilver/95 leading-[1.85] whitespace-pre-line">${escapeHTML(entry.narrative)}</div>
+                        </div>
+                    `;
+
+                    container.appendChild(article);
+                });
+            }
+
+            document.getElementById('history-modal').classList.remove('hidden');
+        }
+
+        function copyFullTranscript() {
+            const logs = gameState.displayLogs || [];
+            if (logs.length === 0) return;
+
+            const lines = [
+                '====================================',
+                '《午夜謝幕：月蝕馬戲團》往昔記憶手稿',
+                '====================================\n'
+            ];
+
+            logs.forEach((entry, idx) => {
+                const ch = entry.turn || (idx + 1);
+                lines.push(`【第 ${ch} 章】 ${entry.actName || ''} | ${entry.location || ''} (${entry.time || ''})`);
+                if (entry.playerAction) {
+                    lines.push(`▶ 你的行動：${entry.playerAction}`);
+                }
+                lines.push(`🎪 場景：\n${entry.scene}\n`);
+                lines.push(`🎭 劇情：\n${entry.narrative}`);
+                lines.push('\n------------------------------------\n');
+            });
+
+            if (gameState.isEnding && gameState.endingData?.title) {
+                lines.push(`【最終謝幕：${gameState.endingData.title}】`);
+                lines.push(`「${gameState.endingData.poem}」\n`);
+                lines.push(gameState.endingData.epilogue);
+            }
+
+            const fullText = lines.join('\n');
+            const textarea = document.createElement('textarea');
+            textarea.value = fullText;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                const label = document.getElementById('copy-transcript-label');
+                label.textContent = '已複製手稿 ✓';
+                setTimeout(() => { label.textContent = '複製全篇手稿'; }, 2200);
+            } catch (err) {
+                console.warn('複製失敗', err);
+            }
+            document.body.removeChild(textarea);
+        }
+
+        // ==================== 7. 存檔與回溯功能 ====================
+        function showSaveToast(msg) {
+            const toast = document.getElementById('save-toast');
+            if (!toast) return;
+            toast.textContent = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 2200);
+        }
+
+        function saveToLocalStorage(key) {
+            try {
+                const payload = {
+                    savedAt: new Date().toLocaleString('zh-TW'),
+                    state: gameState
+                };
+                localStorage.setItem(key, JSON.stringify(payload));
+                updateSaveSlotInfo();
+                return true;
+            } catch (e) {
+                console.warn("無法寫入存檔", e);
+                return false;
+            }
+        }
+
+        function loadFromLocalStorage(key) {
+            try {
+                const raw = localStorage.getItem(key);
+                if (!raw) return false;
+                const parsed = JSON.parse(raw);
+                if (parsed && parsed.state) {
+                    gameState = parsed.state;
+                    return true;
+                }
+            } catch (e) {
+                console.warn("讀取存檔失敗", e);
+            }
+            return false;
+        }
+
+        function updateSaveSlotInfo() {
+            const autoRaw = localStorage.getItem(STORAGE_KEY_AUTO);
+            const manualRaw = localStorage.getItem(STORAGE_KEY_MANUAL);
+            let infoText = [];
+            if (autoRaw) {
+                const d = JSON.parse(autoRaw);
+                infoText.push(`自動進度：${d.savedAt}（第 ${d.state.turnCount} 回合）`);
+            }
+            if (manualRaw) {
+                const d = JSON.parse(manualRaw);
+                infoText.push(`手動刻錄：${d.savedAt}（第 ${d.state.turnCount} 回合）`);
+            }
+            document.getElementById('save-slot-info').innerHTML = infoText.length > 0 
+                ? infoText.join('<br>') 
+                : '尚無存檔紀錄';
+        }
+
+        function rewindLastTurn() {
+            if (!gameState.previousSnapshot) return;
+            const snap = gameState.previousSnapshot;
+            gameState.turnCount = snap.turnCount;
+            gameState.chatHistory = snap.chatHistory;
+            gameState.displayLogs = snap.displayLogs;
+            gameState.hiddenStats = snap.hiddenStats;
+            gameState.publicStatus = snap.publicStatus;
+            gameState.currentChoices = snap.currentChoices;
+            gameState.isEnding = false;
+            gameState.endingData = null;
+            gameState.previousSnapshot = null;
+
+            saveToLocalStorage(STORAGE_KEY_AUTO);
+            document.getElementById('ending-modal').classList.add('hidden');
+            renderGameUI();
+        }
+
+        function restartNewLoop() {
+            gameState = createInitialState();
+            localStorage.removeItem(STORAGE_KEY_AUTO);
+            document.getElementById('ending-modal').classList.add('hidden');
+            document.getElementById('save-modal').classList.add('hidden');
+            document.getElementById('narrative-feed').innerHTML = '';
+            document.getElementById('choices-container').innerHTML = '';
+            callGeminiEngine("", true);
+        }
+
+
+        // ==================== API Key 管理（支援 localStorage 與網址參數 ?key=...） ====================
+        const STORAGE_KEY_API = 'eclipse_circus_gemini_api_key_v1';
+
+        function getStoredApiKey() {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const urlKey = params.get('key') || params.get('apikey');
+                if (urlKey && urlKey.trim()) {
+                    localStorage.setItem(STORAGE_KEY_API, urlKey.trim());
+                    // 清除網址列敏感參數，避免外洩
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    return urlKey.trim();
+                }
+                return (localStorage.getItem(STORAGE_KEY_API) || '').trim();
+            } catch (e) {
+                return '';
+            }
+        }
+
+        function updateApiKeyButtonBadge() {
+            const hasKey = Boolean(getStoredApiKey());
+            const landingLabel = document.getElementById('landing-apikey-label');
+            if (landingLabel) {
+                landingLabel.textContent = hasKey ? 'AI 金鑰已就緒 ✓' : '設定 AI 金鑰';
+            }
+        }
+
+        function openApiKeyModal(noticeMsg = '') {
+            const modal = document.getElementById('apikey-modal');
+            const input = document.getElementById('input-gemini-apikey');
+            const statusEl = document.getElementById('apikey-status-msg');
+            if (!modal || !input) return;
+
+            input.value = getStoredApiKey();
+            if (noticeMsg && statusEl) {
+                statusEl.textContent = noticeMsg;
+                statusEl.classList.remove('hidden');
+            } else if (statusEl) {
+                statusEl.classList.add('hidden');
+            }
+            modal.classList.remove('hidden');
+        }
+
+        // ==================== 8. 工具函式 ====================
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function formatNarrativeParagraphs(text) {
+            return escapeHTML(text);
+        }
+
+        // ==================== 9. 事件綁定與初始化 ====================
+        window.addEventListener('DOMContentLoaded', () => {
+            initParticles();
+            updateCompendiumBadges();
+            updateAudioButtonUI(false);
+            updateApiKeyButtonBadge();
+
+            // 綁定 API Key 設定視窗事件
+            const apiKeyModal = document.getElementById('apikey-modal');
+            const openKeyHandler = () => {
+                audioEngine.playPageTurn();
+                openApiKeyModal();
+            };
+            document.getElementById('btn-landing-apikey')?.addEventListener('click', openKeyHandler);
+            document.getElementById('btn-header-apikey')?.addEventListener('click', openKeyHandler);
+            document.getElementById('btn-close-apikey-modal')?.addEventListener('click', () => {
+                audioEngine.playPageTurn();
+                apiKeyModal.classList.add('hidden');
+            });
+            document.getElementById('btn-save-apikey')?.addEventListener('click', () => {
+                const rawVal = (document.getElementById('input-gemini-apikey').value || '').trim();
+                const statusEl = document.getElementById('apikey-status-msg');
+                if (!rawVal) {
+                    statusEl.textContent = '請輸入有效的 Gemini API Key！';
+                    statusEl.classList.remove('hidden');
+                    return;
+                }
+                localStorage.setItem(STORAGE_KEY_API, rawVal);
+                updateApiKeyButtonBadge();
+                audioEngine.playChoiceClick();
+                statusEl.textContent = '✦ 金鑰已保存，AI 劇情引擎已喚醒！';
+                statusEl.classList.remove('hidden');
+                setTimeout(() => {
+                    apiKeyModal.classList.add('hidden');
+                    // 若剛才因為缺金鑰而卡住，自動重新觸發開局或上一步行動
+                    if (lastFailedPrompt && !document.getElementById('game-screen').classList.contains('hidden')) {
+                        callGeminiEngine(lastFailedPrompt.userActionText, lastFailedPrompt.isOpening);
+                    }
+                }, 650);
+            });
+            document.getElementById('btn-clear-apikey')?.addEventListener('click', () => {
+                localStorage.removeItem(STORAGE_KEY_API);
+                document.getElementById('input-gemini-apikey').value = '';
+                updateApiKeyButtonBadge();
+                const statusEl = document.getElementById('apikey-status-msg');
+                statusEl.textContent = '已從本機瀏覽器清除 API Key。';
+                statusEl.classList.remove('hidden');
+            });
+
+            // 首次點擊或按鍵自動解鎖 AudioContext（解決瀏覽器 Autoplay 限制）
+            const unlockOnceHandler = () => {
+                if (hasUserInteractedOnce) return;
+                hasUserInteractedOnce = true;
+                audioEngine.unlock();
+            };
+            window.addEventListener('pointerdown', unlockOnceHandler, { once: true, passive: true });
+            window.addEventListener('keydown', unlockOnceHandler, { once: true, passive: true });
+
+            // 舞台聚光燈跟隨滑鼠與觸控移動
+            const spotlight = document.getElementById('stage-spotlight');
+            const updateSpotlight = (x, y) => {
+                if (!spotlight) return;
+                spotlight.style.setProperty('--spotlight-x', `${x}px`);
+                spotlight.style.setProperty('--spotlight-y', `${y}px`);
+            };
+            window.addEventListener('mousemove', (e) => updateSpotlight(e.clientX, e.clientY), { passive: true });
+            window.addEventListener('touchmove', (e) => {
+                if (e.touches && e.touches[0]) {
+                    updateSpotlight(e.touches[0].clientX, e.touches[0].clientY);
+                }
+            }, { passive: true });
+
+            // 檢查是否有舊存檔可延續
+            if (localStorage.getItem(STORAGE_KEY_AUTO)) {
+                document.getElementById('btn-continue-save').classList.remove('hidden');
+            }
+
+            // 開始新遊戲（解鎖音訊並啟動氛圍音景）
+            document.getElementById('btn-start-new').addEventListener('click', async () => {
+                hasUserInteractedOnce = true;
+                const active = await audioEngine.enableAmbient();
+                updateAudioButtonUI(active);
+                audioEngine.playChoiceClick();
+
+                document.getElementById('start-screen').classList.add('hidden');
+                document.getElementById('game-screen').classList.remove('hidden');
+                gameState = createInitialState();
+                lastAnnouncedAct = 1;
+                callGeminiEngine("", true);
+            });
+
+            // 延續存檔
+            document.getElementById('btn-continue-save').addEventListener('click', async () => {
+                hasUserInteractedOnce = true;
+                if (loadFromLocalStorage(STORAGE_KEY_AUTO)) {
+                    const active = await audioEngine.enableAmbient();
+                    updateAudioButtonUI(active);
+                    audioEngine.playPageTurn();
+                    lastAnnouncedAct = gameState.hiddenStats?.current_act || 1;
+                    document.getElementById('start-screen').classList.add('hidden');
+                    document.getElementById('game-screen').classList.remove('hidden');
+                    renderGameUI();
+                }
+            });
+
+            // 自由輸入表單送出
+            document.getElementById('custom-action-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const val = document.getElementById('custom-action-input').value;
+                audioEngine.playChoiceClick();
+                submitPlayerAction(val);
+            });
+
+            // 重試按鈕
+            document.getElementById('btn-retry').addEventListener('click', () => {
+                audioEngine.playChoiceClick();
+                if (lastFailedPrompt) {
+                    callGeminiEngine(lastFailedPrompt.userActionText, lastFailedPrompt.isOpening);
+                }
+            });
+
+            // 音效切換（頂部導覽列與標題頁共用）
+            const handleAudioToggle = async () => {
+                hasUserInteractedOnce = true;
+                const active = await audioEngine.toggle();
+                updateAudioButtonUI(active);
+                if (active) {
+                    audioEngine.playBellNote(523.25, 0, 0.14, 1.2);
+                }
+            };
+            document.getElementById('btn-audio-toggle').addEventListener('click', handleAudioToggle);
+            document.getElementById('btn-landing-audio').addEventListener('click', handleAudioToggle);
+
+            // 門票翻面檢視（播放翻頁聲）
+            document.getElementById('ticket-card').addEventListener('click', () => {
+                audioEngine.playPageTurn();
+                const front = document.getElementById('ticket-front');
+                const back = document.getElementById('ticket-back');
+                front.classList.toggle('hidden');
+                back.classList.toggle('hidden');
+            });
+
+            // 手機版側邊手札抽屜開關（播放翻頁聲）
+            const sidebar = document.getElementById('journal-sidebar');
+            const backdrop = document.getElementById('drawer-backdrop');
+            function openDrawer() {
+                audioEngine.playPageTurn();
+                sidebar.classList.remove('translate-x-full');
+                backdrop.classList.remove('hidden');
+            }
+            function closeDrawer() {
+                audioEngine.playPageTurn();
+                sidebar.classList.add('translate-x-full');
+                backdrop.classList.add('hidden');
+            }
+            document.getElementById('btn-mobile-drawer').addEventListener('click', openDrawer);
+            document.getElementById('btn-close-drawer').addEventListener('click', closeDrawer);
+            backdrop.addEventListener('click', closeDrawer);
+
+            // 回溯上一步
+            const handleRewind = () => {
+                audioEngine.playPageTurn();
+                rewindLastTurn();
+            };
+            document.getElementById('btn-rewind').addEventListener('click', handleRewind);
+            document.getElementById('btn-ending-rewind').addEventListener('click', handleRewind);
+
+            // 劇情圖鑑視窗控制（播放翻頁聲）
+            const compendiumModal = document.getElementById('compendium-modal');
+            const handleOpenCompendium = () => {
+                audioEngine.playPageTurn();
+                openCompendiumModal();
+            };
+            const handleCloseCompendium = () => {
+                audioEngine.playPageTurn();
+                compendiumModal.classList.add('hidden');
+            };
+            document.getElementById('btn-landing-compendium').addEventListener('click', handleOpenCompendium);
+            document.getElementById('btn-compendium-modal').addEventListener('click', handleOpenCompendium);
+            document.getElementById('btn-ending-compendium').addEventListener('click', handleOpenCompendium);
+            document.getElementById('btn-close-compendium-modal').addEventListener('click', handleCloseCompendium);
+            document.getElementById('btn-close-compendium-bottom').addEventListener('click', handleCloseCompendium);
+            document.getElementById('btn-compendium-back').addEventListener('click', () => {
+                audioEngine.playPageTurn();
+                document.getElementById('compendium-detail').classList.add('hidden');
+                document.getElementById('compendium-grid').classList.remove('hidden');
+            });
+
+            // 往昔記憶手札 (劇情回顧) 視窗控制（播放翻頁聲）
+            const historyModal = document.getElementById('history-modal');
+            const handleOpenHistory = () => {
+                audioEngine.playPageTurn();
+                openHistoryModal();
+            };
+            const handleCloseHistory = () => {
+                audioEngine.playPageTurn();
+                historyModal.classList.add('hidden');
+            };
+            document.getElementById('btn-history-modal').addEventListener('click', handleOpenHistory);
+            document.getElementById('btn-ending-history').addEventListener('click', handleOpenHistory);
+            document.getElementById('btn-close-history-modal').addEventListener('click', handleCloseHistory);
+            document.getElementById('btn-close-history-bottom').addEventListener('click', handleCloseHistory);
+            document.getElementById('btn-copy-transcript').addEventListener('click', () => {
+                audioEngine.playChoiceClick();
+                copyFullTranscript();
+            });
+            document.getElementById('btn-history-top').addEventListener('click', () => {
+                audioEngine.playPageTurn();
+                const scroller = document.getElementById('history-scroll-container');
+                scroller.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            document.getElementById('btn-history-bottom').addEventListener('click', () => {
+                audioEngine.playPageTurn();
+                const scroller = document.getElementById('history-scroll-container');
+                scroller.scrollTo({ top: scroller.scrollHeight, behavior: 'smooth' });
+            });
+
+            // 存檔視窗控制
+            const saveModal = document.getElementById('save-modal');
+            document.getElementById('btn-save-modal').addEventListener('click', () => {
+                audioEngine.playPageTurn();
+                updateSaveSlotInfo();
+                saveModal.classList.remove('hidden');
+            });
+            document.getElementById('btn-close-save-modal').addEventListener('click', () => {
+                audioEngine.playPageTurn();
+                saveModal.classList.add('hidden');
+            });
+            document.getElementById('btn-manual-save').addEventListener('click', () => {
+                audioEngine.playChoiceClick();
+                if (saveToLocalStorage(STORAGE_KEY_MANUAL)) {
+                    showSaveToast('✦ 記憶已成功刻錄於手札 ✦');
+                }
+            });
+            document.getElementById('btn-manual-load').addEventListener('click', async () => {
+                if (loadFromLocalStorage(STORAGE_KEY_MANUAL)) {
+                    const active = await audioEngine.enableAmbient();
+                    updateAudioButtonUI(active);
+                    audioEngine.playPageTurn();
+                    lastAnnouncedAct = gameState.hiddenStats?.current_act || 1;
+                    saveModal.classList.add('hidden');
+                    renderGameUI();
+                } else {
+                    showSaveToast('尚未刻錄任何手動記憶存檔');
+                }
+            });
+
+            // 重新開始（全新輪迴）
+            const handleRestart = async () => {
+                hasUserInteractedOnce = true;
+                const active = await audioEngine.enableAmbient();
+                updateAudioButtonUI(active);
+                audioEngine.playCurtainChime(false);
+                lastAnnouncedAct = 1;
+                restartNewLoop();
+            };
+            document.getElementById('btn-restart-game').addEventListener('click', handleRestart);
+            document.getElementById('btn-ending-restart').addEventListener('click', handleRestart);
+        });
+    </script>
+</body>
+</html>
